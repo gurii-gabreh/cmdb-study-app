@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全レッスン データエクスポート</title>
+<style>
+body{font-family:sans-serif;background:#0d1117;color:#e6edf3;padding:20px;font-size:14px;}
+h1{font-size:18px;margin-bottom:4px;color:#58a6ff;}
+.sub{font-size:12px;color:#8b949e;margin-bottom:20px;}
+.lb{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px;margin-bottom:12px;}
+.lh{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.chip{font-size:10px;padding:2px 8px;border-radius:4px;background:#1f6feb;color:#fff;font-weight:700;}
+.lt{font-size:13px;font-weight:600;}
+.qc{font-size:11px;color:#8b949e;}
+.br{display:flex;gap:8px;flex-wrap:wrap;}
+.btn{padding:6px 14px;border-radius:6px;border:1px solid #30363d;background:#21262d;color:#8b949e;font-size:12px;cursor:pointer;font-family:inherit;}
+.btn:hover{border-color:#58a6ff;color:#58a6ff;}
+.btn.cp{border-color:#2ea043;color:#3fb950;}
+.btnp{background:#1f6feb;border-color:#58a6ff;color:#fff;}
+.info{background:#0d1117;border:1px solid #21262d;border-radius:6px;padding:8px;font-size:10px;color:#6e7681;margin-top:8px;}
+.stitle{font-size:12px;font-weight:700;color:#8b949e;text-transform:uppercase;margin:16px 0 8px;border-bottom:1px solid #21262d;padding-bottom:4px;}
+.steps{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px;margin-bottom:20px;font-size:12px;color:#8b949e;line-height:2;}
+.steps b{color:#e6edf3;}
+</style>
+</head>
+<body>
+<h1>📚 全レッスン データエクスポート</h1>
+<div class="sub">CMDB Study App に各レッスンをインポートするためのデータです</div>
+<div class="steps">
+<b>インポート手順</b><br>
+1. アプリの「＋ レッスンを追加」をクリック<br>
+2. 基本情報タブ：下記の「コース」「レッスン番号」「タイトル」を入力<br>
+3. 要約データタブ：「📄 要約コピー」を押して貼り付け<br>
+4. ポイント表タブ：「📊 ポイントコピー」を押して貼り付け<br>
+5. 問題データタブ：「❓ 問題コピー」を押して貼り付け<br>
+6. 「✅ インポート」をクリック
+</div>
+<div id="cnt"></div>
+<script>
+const L=[];
+// Course 1 Lesson 1
+L.push({c:"Course 1",l:"1-1",t:"IT Challenges / CMDBの課題",
+s:`現代のエンタープライズにおいて、ITインフラへの visibility（可視性）は mission-critical（事業継続に不可欠）である。hardware、software、appliances、virtual machines、cloud resources、IoT devices、mobile devices、container technologies、orchestrators の普及により複雑化し続けている。
+
+CMDB 導入成功の3本柱は Ingest（取り込み）・Govern（管理）・Insight（洞察）である。
+
+Govern の課題：incorrectly classified CIs（誤分類されたCI）・unwanted or irrelevant data（不要・無関係データ）・inconsistent data quality（データ品質のばらつき）。non-discoverable attributes（support groups・managed by groups）を付加することでデータ品質を向上できる。
+
+Gartner 推計：システムダウンのコストは最大 $300K／時。金融業界ではさらに高額。信頼できる CMDB 構築で ongoing IT efforts を最大 40%削減できる。
+
+ServiceNow CMDB は CIs・services・configured assets の single system of record（単一の信頼できる情報源）として機能する。`,
+p:[
+["定義","visibility into IT infrastructure is mission-critical（事業継続に不可欠）","現代企業においてITインフラの可視化は事業継続に不可欠"],
+["複雑化の要因","hardware・software・appliances・virtual machines・cloud resources・IoT devices・mobile devices・container technologies・orchestrators","これらの proliferation（普及）が可視化を困難にしている"],
+["CMDB成功の3本柱","Ingest（取り込み）・Govern（管理）・Insight（洞察）","この3つが揃わないと CMDB は機能しない"],
+["Govern の課題①","incorrectly classified CIs（誤分類されたCI）","誤分類されたCIへの対処が必要"],
+["Govern の課題②","unwanted or irrelevant data（不要・無関係データ）","不要・無関係データの排除"],
+["Govern の課題③","inconsistent data quality（データ品質のばらつき）","データ品質のばらつきの解消"],
+["データ品質向上策","non-discoverable attributes（自動検出できない属性）の付加","support groups・managed by groups などが該当"],
+["CMDBの評判","failed starts（失敗スタート）・lengthy implementations（長期化）・ongoing maintenance challenges（維持困難）","多くの組織が導入・維持・価値創出に苦戦"],
+["リスク数値","downtime cost: up to $300K an hour（Gartner推計）","金融業界ではさらに高額になる場合あり"],
+["効果数値","最大40%のIT工数削減","well-configured CMDB による効果"],
+["ServiceNow CMDBの定義","single system of record（単一の信頼できる情報源）for CIs・services・configured assets","IT・非ITインフラを一元管理するツール"],
+["ServiceNow CMDBの効果1","IT service management（ITサービス管理）の強化","operational efficiencies（運用効率）の改善にも寄与"],
+["ServiceNow CMDBの効果2","strategic decision-making（戦略的意思決定）の支援","経営判断の質向上に貢献"],
+["結論","CMDBは経営を守る戦略投資","未整備の方がコストが高い"],
+],
+q:[
+{t:"基礎",q:"CMDB 導入成功の3本柱として正しいものはどれか？",o:["Plan・Build・Run","Ingest（取り込み）・Govern（管理）・Insight（洞察）","Collect・Store・Analyze","Monitor・Alert・Respond"],a:1,e:"CMDB 導入成功の3本柱は Ingest（取り込み）・Govern（管理）・Insight（洞察）である。"},
+{t:"基礎",q:"Gartner が推計するシステムダウンのコストは最大いくらか？",o:["最大 $100K／時","最大 $200K／時","最大 $300K／時","最大 $500K／時"],a:2,e:"Gartner の推計ではシステムダウンのコストは最大 $300K（30万ドル）／時である。"},
+{t:"基礎",q:"信頼できる CMDB 構築で削減できる ongoing IT efforts は最大何%か？",o:["最大20%","最大30%","最大40%","最大60%"],a:2,e:"well-configured CMDB により ongoing IT efforts を最大40%削減できる。"},
+{t:"基礎",q:"non-discoverable attributes の例として正しいものはどれか？",o:["IPアドレス","ホスト名","support groups・managed by groups","OSバージョン"],a:2,e:"support groups や managed by groups は non-discoverable attributes（自動検出できない属性）の代表例で、手動で付加してデータ品質を向上させる。"},
+{t:"基礎",q:"ServiceNow CMDB の説明として最も適切なものはどれか？",o:["ITインフラのみを管理するツール","CIs・services・configured assets の single system of record（単一の信頼できる情報源）","セキュリティ管理専用のデータベース","ネットワーク監視に特化したプラットフォーム"],a:1,e:"ServiceNow CMDB は CIs・services・configured assets の single system of record として機能する。"},
+{t:"引っ掛け",q:"Gartner の推計に関して正しい説明はどれか？",o:["金融業界のダウンコストは $300K／時より低い","すべての業界で一律 $300K／時のコストが発生する","$300K／時はあくまで上限であり金融業界ではさらに高額になる場合がある","$300K／時はシステムダウンの平均コストである"],a:2,e:"Gartner の推計は最大 $300K／時であり、金融業界ではさらに高額になる場合がある。平均値ではなく上限値である点に注意。"},
+{t:"意地悪",q:"CMDBプロジェクトの評判として原文に記載されていないものはどれか？",o:["failed starts（失敗スタート）","lengthy implementations（長期化）","ongoing maintenance challenges（維持困難）","high implementation costs（高い導入コスト）"],a:3,e:"原文では failed starts・lengthy implementations・ongoing maintenance challenges の3点が挙げられている。high implementation costs は記載されていない。"},
+{t:"意地悪",q:"ITインフラ複雑化の要因として原文に含まれていないものはどれか？",o:["orchestrators","IoT devices","blockchain nodes","container technologies"],a:2,e:"blockchain nodes は原文に含まれていない。"},
+{t:"試験対策",q:"CMDB の Govern（管理）の課題に含まれないものはどれか？",o:["incorrectly classified CIs","unwanted or irrelevant data","inconsistent data quality","insufficient server capacity（サーバー容量不足）"],a:3,e:"Govern の課題は incorrectly classified CIs・unwanted or irrelevant data・inconsistent data quality の3点。insufficient server capacity は含まれない。"},
+]});
+// Course 1 Lesson 2
+L.push({c:"Course 1",l:"1-2",t:"CMDB Overview（CMDB概要）",
+s:`CMDB（Configuration Management Database）とは、CIs（configuration items・構成アイテム）・services（サービス）・relationships（関係性）の属性を格納する data repository（データリポジトリ）である。configuration management process（構成管理プロセス）によって維持される。
+
+IT professionals は ServiceNow CMDB を活用して IT landscape への visibility を確保し、fact-based decisions（事実に基づく意思決定）を実施できる。顧客が最も成功するのは「CMDB を実装すること」ではなく「configuration management（構成管理）を実装すること」に集中したときである。
+
+CSDM（Common Service Data Model・共通サービスデータモデル）は ServiceNow 製品・プラットフォーム全体の標準化・共有されたサービス関連定義のセット。true service-level reporting を可能にし、CMDB 内の service modeling に prescriptive guidance（規範的なガイダンス）を提供する。ServiceNow AI Platform にも対応。
+
+CMDB は CIs のデータベース。CSDM は common CIs を含む broader（より広範な）共通データモデル。CSDM に従うことでデータが適切な CMDB テーブルに正しくマッピングされ、foundational data（users・groups）が正しく参照される。`,
+p:[
+["CMDBの定義","data repository for CIs・services・relationships（関係性）","組織インフラの属性と表現を格納"],
+["CMDBの役割","configuration management process（構成管理プロセス）によって維持","Service Management・Asset Management・Operations Management などのコア"],
+["CMDBの目的","visibility into IT landscape（ITの全体像）","fact-based decisions と business-critical IT services の提供を支援"],
+["重要な考え方","configuration management（構成管理）の実装に集中する","CMDB の実装ではなく configuration management が成功の鍵"],
+["CSDMの定義","Common Service Data Model（CSDM・共通サービスデータモデル）","ServiceNow 製品・プラットフォーム全体の標準化されたサービス関連定義のセット"],
+["CSDMの役割1","true service-level reporting（真のサービスレベルレポーティング）を可能にする","CMDB 内の service modeling に prescriptive guidance（規範的なガイダンス）を提供"],
+["CSDMの役割2","ServiceNow AI Platform 全体に定義が及ぶ","ServiceNow product portfolio 全体をカバー"],
+["CSDM 5.0 構成要素","ボックス＝CMDBのテーブル / ライン＝テーブル間の relationships","Foundation data（基盤データ）はレコードから参照される基盤データ（users・groups）"],
+["CSDMの位置づけ","すべての ServiceNow 製品が使用する guidance・データフレームワーク","CMDB を含む全製品に適用される"],
+["CMDBとCSDMの違い","CMDB は CIs のデータベース / CSDM は broader な共通データモデル","common CIs（共通構成アイテム）を含む"],
+["CSDMの実用的価値","データが適切な CMDB テーブルに正しくマッピングされ foundational data が正しく参照される","どこに記録するか・どの relationships が重要かを決定する指針"],
+],
+q:[
+{t:"基礎",q:"CMDB の定義として最も正しいものはどれか？",o:["ITセキュリティ専用のデータベース","CIs・services・relationships の属性を格納する data repository","ネットワーク監視ツール","ユーザー管理システム"],a:1,e:"CMDB は CIs・services・relationships の属性と表現を格納する data repository（データリポジトリ）である。"},
+{t:"基礎",q:"CMDB が維持される仕組みはどれか？",o:["incident management process","change management process","configuration management process","problem management process"],a:2,e:"CMDB は configuration management process（構成管理プロセス）によって維持される。"},
+{t:"基礎",q:"CSDM の正式名称はどれか？",o:["Common Service Data Model","Core Service Design Method","Centralized Service Data Management","Consolidated System Data Model"],a:0,e:"CSDM は Common Service Data Model（共通サービスデータモデル）の略称である。"},
+{t:"基礎",q:"CMDB と CSDM の違いとして正しいものはどれか？",o:["CMDBはサービス定義専用・CSDMはCI管理専用","CMDBはCIのデータベース・CSDMはcommon CIsを含むbroaderな共通データモデル","CMDBはクラウド専用・CSDMはオンプレミス専用","両者は全く同じ機能を持つ"],a:1,e:"CMDB は CIs のデータベース。CSDM は common CIs を含む broader（より広範な）共通データモデルである。"},
+{t:"引っ掛け",q:"顧客が最も成功するための考え方として正しいものはどれか？",o:["できるだけ多くの CI を CMDB に登録することに集中する","CMDB を実装することに集中する","configuration management（構成管理）を実装することに集中する","ServiceNow の全製品を導入することに集中する"],a:2,e:"原文では「Customers are most successful when focused on implementing configuration management, and not focused on implementing a CMDB」と明記されている。"},
+{t:"引っ掛け",q:"CSDM に関する説明で誤っているものはどれか？",o:["ServiceNow product portfolio 全体に定義が及ぶ","CMDB 内の service modeling に prescriptive guidance を提供する","ServiceNow AI Platform には対応していない","true service-level reporting を可能にする"],a:2,e:"CSDM の定義は ServiceNow AI Platform 全体にも及ぶと明記されている。「AI Platform には対応していない」は誤り。"},
+{t:"試験対策",q:"CSDM データモデルに従う主な目的はどれか？",o:["コスト削減のため","データが適切な CMDB テーブルに正しくマッピングされ foundational data が正しく参照されるため","セキュリティを強化するため","ユーザーインターフェースを統一するため"],a:1,e:"CSDM に従うことでデータが適切な CMDB テーブルに正しくマッピングされ、users・groups などの foundational data が正しく参照される。"},
+{t:"試験対策",q:"CMDB が支援する関連プロセスとして原文に含まれないものはどれか？",o:["Service Management","Asset Management","Operations Management","Financial Management"],a:3,e:"原文では Service Management・Asset Management・Operations Management が挙げられている。Financial Management は記載がない。"},
+]});
+// Course 1 Lesson 3
+L.push({c:"Course 1",l:"1-3",t:"CMDB Basics（CMDBの基本）",
+s:`主要用語：Configuration Item（CI・構成アイテム）、Attributes（属性）、Class（クラス）、Base Table（ベーステーブル）、Parent and Child Class（親子クラス）、Principal Class（主要クラス）、Logical CI（論理CI）。
+
+Application・Application Service・Business Application は異なる概念で、CSDM フレームワーク内で異なる位置に存在する。
+
+Foundational data（基盤データ）は common data tables に格納され、CMDB には格納されないが CI データから参照される必要がある。参照することで routing・approvals・accurate reporting が実現される。
+
+CMDB の base parent table は Configuration Items [cmdb_ci]。User [sys_user]・Location [cmn_location] などへの参照を持つ。
+
+クラスは parent-child relationships でサブクラスに分割できる。子クラスは親クラスの specialization（特化版）。CI Class Manager または ServiceNow schema map で確認。baseline classes を可能な限り使用することを推奨。
+
+discoverable attributes（自動検出可能）：host name・IP address・operating system。
+non-discoverable attributes（自動検出不可）：Data Manager・certification policies・CMDB Health Dashboard で管理。
+
+solid business case（明確なビジネス根拠）なしに custom attributes を追加すると CMDB initiatives が失敗するリスクがある。attributes は extended classes（拡張クラス）に継承されるため設定レベルが重要。`,
+p:[
+["用語","Configuration Item（CI・構成アイテム）","組織のインフラを構成する管理対象の個別アイテム"],
+["用語","Attributes（属性）","CIを説明する情報の単位（例：OS・owned by）"],
+["用語","Class（クラス）","属性を共有するCIのグループ。ServiceNowインスタンスの実際のテーブル名を指す"],
+["用語","Base Table（ベーステーブル）","CMDB の base parent table は Configuration Items [cmdb_ci]"],
+["用語","Parent and Child Class（親子クラス）","子クラスは親クラスの specialization（特化版）（例：Windows Server は Server の子クラス）"],
+["用語","Principal Class（主要クラス）","CMDB クラス階層における主要なクラス"],
+["用語","Logical CI（論理CI）","物理的な実体を持たない論理的な構成アイテム"],
+["アプリケーションの区別","Application・Application Service・Business Application は異なる概念","CSDM フレームワーク内でそれぞれ異なる位置に存在する"],
+["Foundational data","users・groups・locations・business units などを格納","CMDB には格納されないが CI データから参照される必要がある"],
+["Foundational data の効果","routing・approvals・accurate reporting（正確なレポーティング）の実現","CSDM フレームワーク内で参照することが規定されている"],
+["CMDBベーステーブル","Configuration Items [cmdb_ci] が base parent table","User [sys_user]・Location [cmn_location] などの foundational data テーブルへの参照を持つ"],
+["クラス構造","parent-child relationships でサブクラスに分割","CI Class Manager または ServiceNow schema map で確認可能"],
+["ベストプラクティス","ServiceNow 提供の baseline classes を可能な限り使用","クラス階層の下位になるほど CI はより specialized（特化）される"],
+["discoverable attributes","host name・IP address・operating system","Discovery・Service Mapping・Agent Client Collector で自動収集される"],
+["non-discoverable attributes","手動入力または他データソースとの統合が必要","Data Manager・certification policies・CMDB Health Dashboard で管理"],
+["カスタム属性の注意点","solid business case がない場合は追加しない","根拠なしの custom attributes 追加は CMDB initiatives の失敗リスクを生む"],
+["カスタム属性の設定原則","CMDB class hierarchy の正しいレベルに設定","attributes は extended classes（拡張クラス）に継承される"],
+["追加クラスの取得","CMDB CI Class Models（無償ストアアプリ）をインストール","base instance に含まれない追加クラスを広範囲に取得可能"],
+],
+q:[
+{t:"基礎",q:"CMDB の base parent table の名称はどれか？",o:["Configuration Classes [cmdb_class]","Configuration Items [cmdb_ci]","CI Registry [cmdb_registry]","Service Items [cmdb_service]"],a:1,e:"CMDB の base parent table は Configuration Items [cmdb_ci] であり、CIを説明する attributes を含む。"},
+{t:"基礎",q:"discoverable attributes の例として正しいものはどれか？",o:["support group","managed by group","host name・IP address・operating system","business unit"],a:2,e:"discoverable attributes の例は host name・IP address・operating system である。support group や managed by group は non-discoverable attributes に該当する。"},
+{t:"基礎",q:"Foundational data の格納場所として正しいものはどれか？",o:["CMDB に直接格納される","common data tables に格納され CMDB からは参照される","Application Service テーブルに格納される","Configuration Items [cmdb_ci] に格納される"],a:1,e:"Foundational data は common data tables に格納される。CMDB には格納されないが CI データから参照される必要がある。"},
+{t:"基礎",q:"クラス構造を確認できるツールはどれか？",o:["CMDB Health Dashboard","CI Class Manager または ServiceNow schema map","Data Manager","Service Mapping"],a:1,e:"クラス構造は CI Class Manager または ServiceNow schema map で確認できる。"},
+{t:"基礎",q:"CMDB CI Class Models の説明として正しいものはどれか？",o:["有償のサードパーティ製アドオン","ServiceNow が提供する無償のストアアプリ","デフォルト機能として自動インストールされる","CSDM の一部として提供される"],a:1,e:"CMDB CI Class Models は ServiceNow が提供する無償のストアアプリ。base instance に含まれない追加クラスを取得できる。"},
+{t:"引っ掛け",q:"次の文のうち正しいものはどれか？",o:["Foundational data は CMDB に格納されるため CI データから参照する必要はない","Application・Application Service・Business Application はすべて同じ概念","子クラスは親クラスの specialization であり親クラスの attributes を継承する","non-discoverable attributes は Discovery ツールで自動収集できる"],a:2,e:"子クラスは親クラスの specialization であり親クラスの attributes を継承する。Foundational data は CMDB には格納されない。"},
+{t:"意地悪",q:"クラス設計のベストプラクティスとして原文に記載されていないものはどれか？",o:["baseline classes を可能な限り使用する","クラスはシンプルに保つ","クラス階層の下位になるほど CI はより specialized される","クラス数が多いほど CMDB の品質が向上する"],a:3,e:"「クラス数が多いほど品質が向上する」という記載はない。baseline classes の使用とシンプルな設計が推奨されている。"},
+{t:"試験対策",q:"automated discovery solution を使用する際のカスタム属性のベストプラクティスはどれか？",o:["カスタム属性はすべて自動的に収集されるため確認不要","カスタム属性が自動収集されるか確認し、されない場合は manual update process を実装する","カスタム属性は使用しないことが絶対的なルールである","自動収集できない属性は削除する"],a:1,e:"automated discovery solution を使用する場合、カスタム属性が自動収集されるか確認し、されない場合は manual update process を実装してデータの正確性を確保する。"},
+]});
+// Course 1 Lesson 4
+L.push({c:"Course 1",l:"1-4",t:"Asset & Configuration Management Lifecycles",
+s:`Asset（資産）とは intrinsic financial value（本質的な財務価値）を持つもの。CI（構成アイテム）とはサービス提供に必要で tracking（追跡管理）したいエンティティ。Asset は CI であることが多いが、CI は必ずしも Asset ではない（例：business service は CI だが Asset ではない）。
+
+CI の種類：physical entities（computer・router など）と logical entities（データベースインスタンス・Tomcat など）。
+Asset は financial value の管理 → Asset Management application で管理。
+CI は operational use での tracking → CMDB に格納。
+
+Asset は deploy（展開）されると CI になり、stock（在庫）に戻されるか dispose（廃棄）されるまで CI であり続ける。
+
+Configuration Management：サービスデータと relationships の operational use に焦点。CI の status・attributes・relationships を追跡して IT 環境の正確な情報を維持。
+IT Asset Management：procurement（調達）・cost management・depreciation（減価償却）・compliance・disposal（廃棄）の管理。
+
+CSDM はライフサイクルのステージとステータスを整合させ hardware assets と CMDB の CI を同期させる。
+
+両者は complementary（補完的）であり ITSM において統合されることが多い。目標は operational efficiency と financial accountability の両立。`,
+p:[
+["Assetの定義","Asset＝ intrinsic financial value（本質的な財務価値）を持つもの","個人または企業にとって財務的価値があるもの"],
+["CIの定義","CI＝ サービス提供に必要で tracking（追跡管理）したいエンティティ","必ずしも financial value を持つわけではない"],
+["AssetとCIの関係","Asset は CI であることが多いが、CI は必ずしも Asset ではない","例：business service は CI だが Asset ではない"],
+["CIの種類","physical entities（computer・router）と logical entities（データベースインスタンス・Tomcat）","種類によって管理方法が異なる"],
+["管理の違い","Asset → financial value の管理 / CI → operational use での tracking","目的が異なる"],
+["管理ツールの違い","Asset → Asset Management application / CI → CMDB","IT Service Management・Security Management・Operations Management で活用"],
+["ライフサイクルの関係","Asset は deploy されると CI になる","stock に戻されるか dispose されるまで CI であり続ける"],
+["Configuration Management の焦点","サービスデータと relationships の operational use","CI の status・attributes・relationships を追跡し IT 環境の正確な情報を維持"],
+["IT Asset Management の焦点","物理的IT コンポーネントの financial・contractual 側面","procurement・cost management・depreciation・compliance・disposal"],
+["CSDMの役割","ライフサイクルのステージとステータスを整合させる","hardware assets と CMDB の CI を同期させる"],
+["まとめ","Configuration Management：システムと設定の正確性・整合性 / Asset Management：ownership・cost・lifecycle の管理","両者は complementary で ITSM において統合される"],
+["両者の関係","complementary であり ITSM において統合される","operational efficiency と financial accountability の両立が目標"],
+],
+q:[
+{t:"基礎",q:"Asset の定義として正しいものはどれか？",o:["サービス提供に必要で tracking したいエンティティ","intrinsic financial value を持つもの","CMDB に格納されるすべての項目","ServiceNow で管理されるすべてのデータ"],a:1,e:"Asset とは intrinsic financial value（本質的な財務価値）を持つものである。"},
+{t:"基礎",q:"Asset と CI の管理ツールの組み合わせとして正しいものはどれか？",o:["Asset→CMDB・CI→Asset Management","Asset→Asset Management・CI→CMDB","両方CMDBで管理","両方Asset Managementで管理"],a:1,e:"Asset は Asset Management application で管理され、CI は CMDB に格納される。"},
+{t:"基礎",q:"Asset が CI になるタイミングはいつか？",o:["購入（procurement）されたとき","deploy（展開）されたとき","dispose（廃棄）されたとき","stock（在庫）に登録されたとき"],a:1,e:"Asset は deploy（展開）されると CI となる。"},
+{t:"基礎",q:"IT Asset Management が集中する内容として正しいものはどれか？",o:["CI の relationships と operational use","procurement・cost management・depreciation・compliance・disposal","IT 環境の status と attributes の追跡","サービスデータのリアルタイム監視"],a:1,e:"IT Asset Management は物理的ITコンポーネントの financial・contractual 側面に集中する。"},
+{t:"引っ掛け",q:"次の文のうち正しいものはどれか？",o:["すべての CI は必ず Asset でもある","Asset は CI であることが多いが CI は必ずしも Asset ではない","すべての Asset は CI ではない","business service は財務価値を持つため Asset に分類される"],a:1,e:"Asset は CI であることが多いが CI は必ずしも Asset ではない。business service は CI だが財務価値を持たないため Asset ではない。"},
+{t:"引っ掛け",q:"logical entities の CI の例として正しいものはどれか？",o:["computer","router","データベースインスタンスや Tomcat","サーバーラック"],a:2,e:"logical entities の CI 例はデータベースインスタンスや Tomcat などのアプリケーション。computer・router は physical entities。"},
+{t:"意地悪",q:"CMDB に格納された CI が活用される ServiceNow 製品として原文に記載されていないものはどれか？",o:["IT Service Management","Security Management","Operations Management","Financial Management"],a:3,e:"原文では IT Service Management・Security Management・Operations Management が挙げられている。Financial Management は記載されていない。"},
+{t:"試験対策",q:"Asset と CI のライフサイクルを効果的に管理することで達成できるものはどれか？",o:["ITコストの完全な排除","IT インフラの holistic view の実現と operational efficiency・financial accountability の両立","すべての IT プロセスの完全自動化","CMDB への全データの一元集約"],a:1,e:"Asset と CI のライフサイクルを効果的に管理することで IT インフラの holistic view が実現し、operational efficiency と financial accountability の両立が達成できる。"},
+]});
+// Course 1 Lesson 5
+L.push({c:"Course 1",l:"1-5",t:"Why Implement a CMDB?",
+s:`ServiceNow CMDB 導入は IT・非IT 両方の管理を変革する。centralized・accurate・up-to-date なリポジトリを提供し、streamlined operations・reduced downtime・proactive issue resolution を実現する。
+
+healthy CMDB が答える問い：インシデントの影響サービス / 提案された変更の影響 / regulatory requirements への準拠 / physical assets の把握 / vendor contracts の詳細 / Business Application 廃止時に撤去できるハードウェア / ビジネスユニット売却時の廃止インフラ
+
+IT 関連ユースケース：IT Asset Management・Incident and Problem Management・Change Management・Security and Compliance・Vendor and Contract Management・Cost Management
+
+非IT 関連ユースケース：Facility Management・Healthcare・Transportation and Logistics・Manufacturing・Real Estate・Energy and Utilities
+
+data health の3条件：①up to date（最新）であること ②proper relationships が確立・維持されていること ③foundational data（location・ownership・support group）が configuration data に関連付けられていること
+
+healthy CMDB はすべての ServiceNow 製品のビジネス価値実現において foundational（基盤的）。incident resolution・vulnerability age など多くの operational metrics との positive correlation（正の相関）を示す。
+
+stakeholders は異なる goals と outcomes を持つ。configuration management 目標への agreement によって alignment を確保し、組織の strategic goals と IT の tactical goals に明確に結びつけることが重要。`,
+p:[
+["CMDB導入の目的","centralized・accurate・up-to-date なリポジトリの提供","streamlined operations・reduced downtime・proactive issue resolution を実現"],
+["healthy CMDBが答える問い①","インシデントの影響サービスの特定","Which services are impacted by an incident を可視化"],
+["healthy CMDBが答える問い②","変更の影響範囲の把握","proposed change の impact を事前確認"],
+["healthy CMDBが答える問い③","regulatory requirements へのコンプライアンス確認","資産が規制要件に準拠しているかを確認"],
+["healthy CMDBが答える問い④","Business Application 廃止時の撤去可能ハードウェアの特定","ビジネスユニット売却時の廃止インフラも特定可能"],
+["IT関連ユースケース","IT Asset Management・Incident and Problem Management・Change Management","Security and Compliance・Vendor and Contract Management・Cost Management"],
+["非IT関連ユースケース","Facility Management・Healthcare・Transportation and Logistics","Manufacturing・Real Estate・Energy and Utilities"],
+["data health の条件①","データが up to date（最新）であること","定期的な更新と確認が必要"],
+["data health の条件②","proper relationships が確立・維持されていること","データ間の関係性の整合性が重要"],
+["data health の条件③","foundational data（location・ownership・support group）を configuration data に関連付ける","レポーティングと routing の精度に直結"],
+["healthy CMDBの効果","すべての ServiceNow 製品のビジネス価値実現において foundational（基盤的）","incident resolution・vulnerability age など operational metrics との positive correlation（正の相関）を示す"],
+["ステークホルダー管理","各 stakeholder は異なる goals と outcomes を持つ","configuration management 目標への agreement が alignment に不可欠"],
+],
+q:[
+{t:"基礎",q:"CMDB 導入が実現する3つの効果として正しいものはどれか？",o:["cost reduction・staff reduction・automation","streamlined operations・reduced downtime・proactive issue resolution","faster deployment・lower cost・better UI","centralized billing・unified login・automated patching"],a:1,e:"CMDB 導入は streamlined operations・reduced downtime・proactive issue resolution の3つを実現する。"},
+{t:"基礎",q:"CMDB の IT 関連ユースケースとして原文に記載されているものはどれか？",o:["Facility Management・Healthcare・Manufacturing","IT Asset Management・Incident and Problem Management・Change Management・Security and Compliance・Vendor and Contract Management・Cost Management","Real Estate・Energy and Utilities・Transportation","HR Management・Finance Management・Marketing Management"],a:1,e:"IT 関連ユースケースは IT Asset Management・Incident and Problem Management・Change Management・Security and Compliance・Vendor and Contract Management・Cost Management の6つ。"},
+{t:"基礎",q:"CMDB の非IT 関連ユースケースとして原文に記載されているものはどれか？",o:["IT Asset Management・Change Management","Facility Management・Healthcare・Transportation and Logistics・Manufacturing・Real Estate・Energy and Utilities","Incident Management・Problem Management","Vendor Management・Contract Management"],a:1,e:"非IT 関連ユースケースは Facility Management・Healthcare・Transportation and Logistics・Manufacturing・Real Estate・Energy and Utilities の6つ。"},
+{t:"基礎",q:"data health（データ品質）の3条件として正しいものはどれか？",o:["データ量・処理速度・セキュリティレベル","up to date であること・proper relationships の確立・foundational data の関連付け","暗号化・バックアップ・冗長化","自動化・標準化・可視化"],a:1,e:"data health の3条件は up to date であること・proper relationships の確立・維持・foundational data の configuration data への関連付けである。"},
+{t:"基礎",q:"healthy CMDB と operational metrics の関係として正しいものはどれか？",o:["healthy CMDB は operational metrics に影響を与えない","時間をかけて健全に維持された CMDB は incident resolution・vulnerability age など多くの operational metrics との positive correlation（正の相関）を示す","CMDB が healthy であるほど operational metrics は悪化する","CMDB の health と operational metrics は無関係"],a:1,e:"時間をかけて健全に維持された CMDB は incident resolution・vulnerability age など多くの operational metrics との positive correlation（正の相関）を示す。"},
+{t:"意地悪",q:"healthy CMDB が答えられる問いとして原文に記載されていないものはどれか？",o:["What is the impact of a proposed change?","Are our assets compliant with regulatory requirements?","What is the total IT budget for next year?","What hardware can be removed when retiring a Business Application?"],a:2,e:"IT budget（IT予算）に関する問いは原文に含まれていない。"},
+{t:"試験対策",q:"CMDB 導入プロジェクトで stakeholders の alignment を確保するために最も重要なアクションはどれか？",o:["最も権限のある stakeholder の目標を優先する","configuration management の goals と objectives への agreement を得て alignment を確保し組織の strategic goals と IT の tactical goals に結びつける","すべての stakeholder の要求をすべて実装する","IT 部門のみで目標を決定する"],a:1,e:"agreement によって stakeholders の alignment を確保し、取り組みを組織の strategic goals と IT 部門の tactical goals に結びつけることが最重要。"},
+]});
+// Course 1 Lesson 6
+L.push({c:"Course 1",l:"1-6",t:"Steps to Deploying a Trustworthy CMDB",
+s:`key business initiatives と strategic IT initiatives を特定することが出発点。会社が既に使用している言語で表現することで faster buy-in が得られる。4つのステップは必ずしも linear（線形）ではない。
+
+Step 1：Set Direction
+clear goals・actionable objectives・measurable business outcomes から始める。What・How・Why・Measure の4つの問いに答える。reporting needs はデータ投入前の設計段階で決定する。方向性なしの構築は「flying while building a plane（飛行中に飛行機を組み立てる）」ようなもの。
+
+Step 2：Build Team and Governance Model
+Configuration Control Board（CCB・構成管理委員会）を結成。executives からの early buy-in が credibility・trust・adoption を向上。CMDB のデータは CMDB チームが所有しない。適切な data owners を特定しガバナンスに参加させることが不可欠。CMDB チームが検証できるのは duplicate records・missing attributes などの基本的なチェックのみ。
+
+Step 3：Design Data Model
+use cases を支援するデータのみを格納。out-of-the-box CI classes で fastest time to value を目指す（例：Firewall・Server・Application）。CSDM を理解し活用することを推奨。
+
+Step 4：Operationalize and Govern
+3本柱：Ingestion（データフローの自動化）・Governance（データの管理・維持）・Insight（データの可視化・活用）。「garbage in – garbage out」の原則を意識する。
+
+導入効果：incident/problem/change/asset management の促進・strategic planning の支援・single source of truth による collaboration 強化・failed changes リスクの低減・audits の促進・root cause analysis の支援。`,
+p:[
+["前提","key business initiatives と strategic IT initiatives の特定が出発点","会社が既に使用している言語で表現することで faster buy-in が得られる"],
+["ステップの特性","4つのステップは必ずしも linear（線形）ではない","組織のニーズに合わせて最適化が必要"],
+["Step 1：Set Direction","clear goals・actionable objectives・measurable business outcomes から始める","方向性なしの CMDB 構築は flying while building a plane（飛行中に飛行機を組み立てる）ようなもの"],
+["Step 1：4つの問い","What・How・Why・Measure","Measure：effectiveness と benefits を継続的に測定"],
+["Step 1：reporting needs","reporting needs はデータ投入前の設計段階で決定する","データ投入後に決定するのは誤りである"],
+["Step 2：CCB","Configuration Control Board（CCB）を結成する","CMDB が継続的な価値を提供できるよう方向性を設定し意思決定を行うチーム"],
+["Step 2：early buy-in","executives からの early buy-in が重要","長期的な credibility・trust・adoption の向上につながる"],
+["Step 2：データオーナー","CMDB のデータは CMDB チームが所有しない","適切な data owners を特定しガバナンスに参加させることが不可欠"],
+["Step 3：データモデル設計","use cases を支援するデータのみを CMDB に格納","out-of-the-box CI classes で fastest time to value を目指す"],
+["Step 3：CSDM の活用","CSDM を理解し活用することが推奨される","standardized framework として service と構成要素のデータを管理"],
+["Step 4：Ingestion","データフローを可能な限り自動化する","ユースケースを支援する頻度でデータを取り込む"],
+["Step 4：Governance","データの管理・維持 / healthy and trusted CMDB の維持が目的","データ取り込みは CMDB ジャーニーの始まりに過ぎない"],
+["Step 4：Insight","プラットフォーム全体でデータを可視化・活用する","informed decisions を支援"],
+["Step 4：原則","garbage in – garbage out（質の低いデータを入れると質の低い結果しか出ない）","CMDB データは platform adoption の基盤"],
+["導入効果1","incident・problem・change・asset management の促進","accurate and up-to-date configuration data の提供による"],
+["導入効果2","strategic planning と IT initiatives の優先順位付けの支援","accurate insights に基づく"],
+["導入効果3","single source of truth による IT チーム間の collaboration 強化","configuration data の統一が基盤"],
+["導入効果4","failed changes リスクの低減・audits の促進・root cause analysis の支援","dependencies と potential impacts の可視化による"],
+],
+q:[
+{t:"基礎",q:"Step 1（Set Direction）の4つの問いとして正しいものはどれか？",o:["Who・When・Where・How Much","What・How・Why・Measure","Plan・Do・Check・Act","Ingest・Govern・Insight・Report"],a:1,e:"Step 1 では What・How・Why・Measure の4つの問いに答えることが求められる。"},
+{t:"基礎",q:"reporting needs を決定するタイミングとして正しいものはどれか？",o:["データを CMDB に投入した後","データを CMDB に投入する前の設計段階","CMDB 導入完了後","ステークホルダーから要求があったとき"],a:1,e:"reporting needs はデータ投入前の設計段階で決定する必要がある。"},
+{t:"基礎",q:"方向性なしに CMDB を構築することを原文ではどのように表現しているか？",o:["building a house on sand","flying while building a plane（飛行中に飛行機を組み立てる）","running before walking","counting chickens before they hatch"],a:1,e:"原文では「flying while building a plane（飛行中に飛行機を組み立てる）」と表現している。"},
+{t:"基礎",q:"CCB（Configuration Control Board）の役割として正しいものはどれか？",o:["CMDB のセキュリティ監査を行う","CMDB が継続的な価値を提供できるよう方向性を設定し意思決定を行う","CMDB のデータを自動収集する","CMDB のコストを管理する"],a:1,e:"CCB は CMDB が継続的な価値を提供できるよう方向性を設定し意思決定を行うチームである。"},
+{t:"基礎",q:"Step 4 の3本柱として正しいものはどれか？",o:["Plan・Build・Run","Ingestion・Governance・Insight","Ingest・Govern・Report","Discover・Map・Analyze"],a:1,e:"Step 4 の3本柱は Ingestion（取り込み）・Governance（ガバナンス）・Insight（洞察）である。"},
+{t:"引っ掛け",q:"CMDB のデータ所有に関して正しいものはどれか？",o:["CMDB チームがすべてのデータの正確性を検証できる","CMDB チームはデータを所有せず適切な data owners をガバナンスに参加させることが不可欠","IT 部門がすべてのデータを所有する","データオーナーは CMDB チームとは関係ない"],a:1,e:"CMDB のデータは CMDB チームが所有しない。適切な data owners を特定しガバナンスに参加させることが不可欠。"},
+{t:"引っ掛け",q:"Governance に関して正しいものはどれか？",o:["データを CMDB に取り込むことがゴール","データの取り込みは CMDB ジャーニーの始まりに過ぎず取り込み後の管理・維持が healthy and trusted CMDB を維持するために必要","Governance は Ingestion と同じ概念","Governance はセキュリティ管理のみを指す"],a:1,e:"原文では「Getting the data in is just the beginning of your CMDB journey」と明記されている。Governance はデータ取り込み後の管理・維持が重要。"},
+{t:"意地悪",q:"信頼できる CMDB 導入の効果として原文に記載されていないものはどれか？",o:["IT チーム間の collaboration 強化","failed changes リスクの低減","すべての IT コストの完全排除","root cause analysis の支援"],a:2,e:"「すべての IT コストの完全排除」は原文に記載されていない。"},
+{t:"試験対策",q:"信頼できる CMDB が組織にもたらす最終的な価値として正しいものはどれか？",o:["CMDB を単なる情報のリポジトリとして維持すること","CMDB を actively used かつ maintained なリソースとして機能させ efficiency・service quality・strategic business goals を支援すること","すべての IT 運用を自動化すること","すべてのデータを一元管理すること"],a:1,e:"信頼できる CMDB の導入により、CMDB は単なる情報リポジトリではなく actively used and maintained resource として機能し efficiency・service quality・strategic business goals の支援を実現する。"},
+]});
+// Course 1 Lesson 7
+L.push({c:"Course 1",l:"1-7",t:"CMDB Management Tools（管理ツール）",
+s:`ServiceNow CMDB は ingest・govern・insight するための suite of management tools を提供する。
+
+CMDB Workspace：3本柱すべてにまたがる comprehensive・centralized プラットフォーム。Single Pane of Glass・Dashboards and Charts・Task Management を提供。有償ライセンス不要。
+
+Ingestion ツール：
+・ServiceNow Discovery（Horizontal/Agentless discovery）：自動ディスカバリー・インフラマッピング。有償（ITOM Visibility の一部）。non-discoverable data で補完が必要。
+・Service Mapping（Top-down/ML powered mapping）：Top-Down Mapping・Dynamic Updates。有償（ITOM Visibility の一部）。CSDM ガイドライン準拠を推奨。
+・Agent Client Collector（ACC/Agent based discovery）：エージェントインストール必須。software utilization data を収集。有償。
+・Service Graph Connectors：Azure・InTune・MS SCCM・Jamf・AWS など。有償（SCCM のみ無償）。credentials 必要。
+・IntegrationHub ETL：ETL 自動化。non-CMDB テーブルもサポート。無償（Store 経由）。
+・Import Sets and Transform Maps：最古の方法。デフォルトで IRE を使用しない→transform map script で IRE 通過を強制することを推奨。無償。
+
+Governance ツール：
+・CMDB Health Dashboard：Completeness・Correctness・Compliance の3観点。scheduled jobs はデフォルトでオフ→手動アクティベートが必要。無償。
+・CMDB Data Manager：Data Certification・Lifecycle Policies・Attestation Policies。無償。
+・Duplicate CI Remediation Wizard：重複CIの自動検出・Merge/Delete。manual effort 必要。無償。
+・De-Duplication Templates：スケジュール自動実行。公開前に in-depth testing を推奨。無償。
+
+Insight ツール：
+・CMDB Query Builder：drag-and-drop・AND/OR フィルタリング。無償。
+・Unified Map：Interactive Visualization・Dependency Mapping。無償。
+・Intelligent Search：NLQ（natural language query）による AI-Powered 検索。NLQ により必要スキルが大幅削減。無償。
+・CMDB and CSDM Data Foundations Dashboards：Visibility・Policy Compliance・Playbooks。無償（Store 経由）。`,
+p:[
+["CMDB Workspace","3本柱すべてにまたがる comprehensive・centralized プラットフォーム。有償ライセンス不要","Single Pane of Glass・Dashboards and Charts・Task Management を提供"],
+["ServiceNow Discovery","別名：Horizontal discovery・Agentless discovery。有償（ITOM Visibility の一部）","Automated Discovery と Infrastructure Mapping を提供。non-discoverable data での補完が必要"],
+["Service Mapping","別名：Top-down discovery・Tag based discovery・ML powered mapping。有償（ITOM Visibility の一部）","Top-Down Mapping と Dynamic Updates を提供。CSDM ガイドライン準拠を推奨"],
+["Agent Client Collector（ACC）","別名：ACC・Agent based discovery。有償","software utilization data の収集はエージェントなしでは不可能。Software Asset Management ユースケースに対応"],
+["Service Graph Connectors","Azure・InTune・MS SCCM・Jamf・AWS などと統合。有償（SCCM のみ無償）","credentials（認証情報）が必要"],
+["IntegrationHub ETL","ETL プロセスを自動化。non-CMDB・foundational tables もサポート。有償ライセンス不要（Store 経由）","外部ソースから ServiceNow へのシームレスなデータ統合"],
+["Import Sets and Transform Maps","最も古いデータインポート方法。有償ライセンス不要","デフォルトでは IRE を使用しない→transform map script で IRE 通過を強制することを推奨"],
+["CMDB Health Dashboard","Completeness・Correctness・Compliance の3観点。有償ライセンス不要","scheduled jobs はデフォルトでオフ→手動でアクティベートが必要"],
+["CMDB Data Manager","Data Certification・Lifecycle Policies（Retire・Archive・Delete）・Attestation Policies。有償ライセンス不要","ライフサイクルポリシーには active life cycle rule が必要"],
+["Duplicate CI Remediation Wizard","重複CIの自動検出とMerge/Delete機能。有償ライセンス不要","各タスクの解決には manual effort が必要"],
+["De-Duplication Templates","スケジュールに従って重複を自動処理（Merge/Delete）。有償ライセンス不要","公開前に in-depth testing を強く推奨"],
+["CMDB Query Builder","Visual Interface（drag-and-drop）と Advanced Filtering（AND/OR）。有償ライセンス不要","ServiceNow データモデルの solid understanding が必要"],
+["Unified Map","Interactive Visualization と Dependency Mapping を提供。有償ライセンス不要","CIs の依存関係を可視化し変更やインシデントの impact を特定"],
+["Intelligent Search","NLQ（natural language query）を使用した AI-Powered 検索。有償ライセンス不要","NLQ により必要なスキルセットが大幅に削減される"],
+["CMDB and CSDM Data Foundations Dashboards","Visibility・Policy Compliance・Playbooks を提供。有償ライセンス不要（Store 経由で更新）","CMDB データ品質の可視化とガイダンスを提供"],
+],
+q:[
+{t:"基礎",q:"CMDB Workspace の説明として正しいものはどれか？",o:["Ingestion のみをサポートするツール","3本柱（Ingest・Govern・Insight）すべてにまたがる comprehensive・centralized プラットフォーム。有償ライセンス不要","有償ライセンスが必要なツール","ServiceNow Discovery の別名"],a:1,e:"CMDB Workspace は3本柱すべてにまたがる comprehensive・centralized プラットフォーム。有償ライセンスは不要。"},
+{t:"基礎",q:"ServiceNow Discovery の別名として正しいものはどれか？",o:["Top-down discovery・Tag based discovery","Agent based discovery・ACC","Horizontal discovery・Agentless discovery","ML powered mapping"],a:2,e:"ServiceNow Discovery の別名は Horizontal discovery・Agentless discovery である。"},
+{t:"基礎",q:"CMDB Health Dashboard の Health Scorecard が評価する3つの観点として正しいものはどれか？",o:["Speed・Scale・Security","Completeness・Correctness・Compliance","Ingest・Govern・Insight","Plan・Do・Check"],a:1,e:"CMDB Health Dashboard の Health Scorecard は Completeness・Correctness・Compliance の3観点で評価する。"},
+{t:"基礎",q:"ACC（Agent Client Collector）のみが収集できるデータとして正しいものはどれか？",o:["IP address","hostname","software utilization data","OS バージョン"],a:2,e:"software utilization data はエージェントなしでは収集不可能。ACC はこのデータを収集し Software Asset Management ユースケースに対応する。"},
+{t:"基礎",q:"Import Sets and Transform Maps の重要な注意事項として正しいものはどれか？",o:["デフォルトで IRE を使用するため duplicate records は発生しない","デフォルトでは IRE を使用しないため transform map script で IRE 通過を強制することを推奨","有償ライセンスが必要","エージェントのインストールが必要"],a:1,e:"Import Sets and Transform Maps はデフォルトでは IRE を使用しないため duplicate records が発生する可能性がある。transform map script で IRE 通過を強制することを推奨。"},
+{t:"引っ掛け",q:"CMDB Health Dashboard の scheduled jobs に関して正しいものはどれか？",o:["デフォルトでオンになっている","デフォルトでオフのため手動でアクティベートが必要","有償ライセンスが必要","自動的に設定される"],a:1,e:"CMDB Health Dashboard のスコアカード生成用 scheduled jobs はデフォルトでオフのため手動でアクティベートする必要がある。"},
+{t:"意地悪",q:"有償ライセンスが必要なツールはどれか？",o:["CMDB Workspace","IntegrationHub ETL","Service Mapping（ITOM Visibility の一部）","Import Sets and Transform Maps"],a:2,e:"Service Mapping は有償ライセンスが必要で ITOM Visibility の一部。CMDB Workspace・IntegrationHub ETL・Import Sets and Transform Maps はいずれも有償ライセンス不要。"},
+{t:"試験対策",q:"Governance ツールとして正しいものはどれか？",o:["ServiceNow Discovery・Service Mapping・ACC","CMDB Health Dashboard・CMDB Data Manager・Duplicate CI Remediation Wizard・De-Duplication Templates","CMDB Query Builder・Unified Map・Intelligent Search","CMDB Workspace・IntegrationHub ETL・Import Sets"],a:1,e:"Governance ツールは CMDB Health Dashboard・CMDB Data Manager・Duplicate CI Remediation Wizard・De-Duplication Templates である。"},
+]});
+// Course 1 Lesson 8 (Knowledge Check)
+L.push({c:"Course 1",l:"1-8",t:"Knowledge Check（確認テスト）",
+s:`本レッスンは Course 1 の総まとめ確認テストです。
+
+Q1（複数選択）：CMDB 実装失敗の主な理由
+→ 正解：Ill-defined relationships among CIs・Inconsistent data quality・Vast amounts of unused data
+
+Q2（複数選択）：CMDBの健全性を維持するための pillars to success
+→ 正解：Ingest・Govern・Insight
+
+Q3（単一選択）：stakeholder の役割
+→ 正解：ケーパビリティをサポートするために必要な特定のCI情報を決定しorganizational buy-inを構築する
+
+Q4（マッチング）：用語と説明の対応
+→ Class＝共通attributesを持つCIグループのテーブル / Attributes＝CIをさらに説明する情報 / CI＝管理が必要な物理的・論理的コンポーネント / CSDM＝サービス関連定義の標準化・共有されたセット / Printers and Physical Servers＝Assets / Databases and Virtual Servers＝Configuration Items / Foundational Data＝Users・groups・locations / CMDB＝configuration recordsを格納するDB / Contracts and Software Licenses＝Both Assets and CIs
+
+Q5（単一選択）：Server class は Computer class から extended → parent class は Computer`,
+p:[
+["Q1：CMDB失敗の理由","Ill-defined relationships・Inconsistent data quality・Vast amounts of unused data（3つ選択）","Too many non-IT CIs は原文に記載なし"],
+["Q2：CMDBの3本柱","Ingest・Govern・Insight（3つ選択）","Compliance と Design は含まれない"],
+["Q3：stakeholderの役割","ケーパビリティをサポートするために必要な特定のCI情報を決定しorganizational buy-inを構築する","CIデータのインポートやレポートの特定ではない"],
+["Q4：マッチング①","Class→共通attributesを持つCIグループのテーブル","Attributes→CIをさらに説明する情報（name・serial number・OSなど）"],
+["Q4：マッチング②","CI→管理が必要な物理的・論理的コンポーネント","CSDM→サービス関連定義の標準化・共有されたセット"],
+["Q4：マッチング③","Printers and Physical Servers→Assets","Databases and Virtual Servers→Configuration Items"],
+["Q4：マッチング④","Foundational Data→Users・groups・locations","CMDB→configuration recordsを格納するデータベース"],
+["Q4：マッチング⑤","Contracts and Software Licenses→Both Assets and Configuration Items","資産かつ構成アイテムの両方"],
+["Q5：parent class","Server class は Computer class から extended → Computer が parent class","Server は Computer の specialization（特化版）"],
+],
+q:[
+{t:"試験対策",q:"CMDB 実装失敗の理由として正しいものはどれか？（3つ選択→ここでは代表1問）",o:["Too many non-IT configuration items（非IT構成アイテムが多すぎる）","Ill-defined relationships among CIs・Inconsistent data quality・Vast amounts of unused data の3つ","CMDB が複雑すぎる","予算が不足している"],a:1,e:"原文では Ill-defined relationships・Inconsistent data quality・Vast amounts of unused data の3つが失敗理由として挙げられている。Too many non-IT CIs は含まれない。"},
+{t:"試験対策",q:"CMDBの健全性を維持するための pillars to success として正しいものはどれか？",o:["Plan・Build・Run","Ingest・Govern・Insight","Compliance・Design・Insight","Discover・Map・Analyze"],a:1,e:"pillars to success は Ingest・Govern・Insight の3つ。Compliance と Design は含まれない。"},
+{t:"試験対策",q:"CMDB 導入における stakeholder の役割として正しいものはどれか？",o:["CI data（name・source・relationships）のインポート","ケーパビリティをサポートするために必要な特定のCI情報を決定しorganizational buy-inを構築する","configuration management の go-forward strategy を作成する","関連部門のCI health を示すレポートを特定する"],a:1,e:"stakeholder の役割は、ケーパビリティをサポートするために必要な特定のCI情報を決定し organizational buy-in（組織内の賛同）を構築することである。"},
+{t:"試験対策",q:"Server class は Computer class から extended されている。parent class はどちらか？",o:["Computer（コンピュータークラス）","Server（サーバークラス）","It depends（場合による）","Both（両方）"],a:0,e:"Server class は Computer class から extended されているため Computer が parent class（親クラス）である。Server は Computer の specialization（特化版）。"},
+{t:"試験対策",q:"マッチング：Foundational Data の説明として正しいものはどれか？",o:["configuration recordsを格納するデータベース","サービス関連定義の標準化・共有されたセット","Users・groups・locations","共通attributesを持つCIグループのテーブル"],a:2,e:"Foundational Data は Users・groups・locations などを指す。"},
+]});
+// Course 2 Lesson 1
+L.push({c:"Course 2",l:"2-1",t:"CI Class Manager（CIクラスマネージャー）",
+s:`CI Class Manager は CMDB 内の CI とクラスを管理する centralized ツール。tree-view format でCMDBクラス階層を一元管理する。
+
+主な利点：Centralized Management・Class Definitions and Settings（identification rules・reconciliation rules・CMDB Health）・Hierarchy and Relationships・Attributes and Rules Management・Health and Compliance（compliance audits・certification filters・templates）・Extensibility・Improved Data Accuracy
+
+【重要】新しい CMDB クラスの作成は慎重に。ライセンス・governance・insight への影響あり。まず CMDB CI Class Models をインストールして既存クラスを確認し、必要なら既存クラスを extend することを推奨。作成権限：sn_cmdb_admin and personalize_dictionary または admin ロールのみ。
+
+technical debt 解消：CI Class Manager で baseline class を特定し、CIをカスタムクラスから標準クラスへ attributes を正しくマッピングして移動。
+
+Principal Class：ITSMレコードの「Configuration Item」参照フィールドに表示されるCIをフィルタリング。例：「Servers」を設定するとサーバー関連CIのみが表示される。
+
+Managed By Group：technical service offering で設定した場合は CI Class Manager の設定より優先される。
+
+Identification Rules：Name・Serial Number・Device ID・Object ID・Configuration file などで一意に識別。
+Reconciliation Rules：どの discovery sources が特定のCI属性を更新できるかを指定。未承認ソースによる上書きを防止。Data refresh rules で上位優先度ソースが更新していない場合のデータ更新方法を管理。
+Suggested Relationships：predefined recommendations。例：Provides Power for :: Receives Power From / Runs on :: Hosts。不適切例：a rack runs on a server / a server runs on a database。
+
+従来の設定方法：application navigator から各アプリケーションに直接アクセス。複数テーブルの設定を single list view で確認したい場合に有用。`,
+p:[
+["CI Class Managerの定義","CMDB内のCIとクラスを centralized（集中管理）するツール","tree-view format でCMDBクラス階層を表示・管理"],
+["主な利点①","Centralized Management（集中管理）・Class Definitions and Settings","identification rules・reconciliation rules・CMDB Health の設定を管理"],
+["主な利点②","Hierarchy and Relationships・Attributes and Rules Management","parent-child relationships の確認・attributes・suggested relationships 等を管理"],
+["主な利点③","Health and Compliance（compliance audits・certification filters・templates）","Extensibility・Improved Data Accuracy"],
+["クラス作成の注意","新しいCMDBクラスの作成は慎重に行う","ライセンス・governance・insight への影響あり。まず CMDB CI Class Models をインストールして確認"],
+["クラス作成権限","sn_cmdb_admin and personalize_dictionary または admin ロールのみ","権限なしのユーザーは新規クラスを作成できない"],
+["technical debt 解消","CI Class Manager で baseline class を特定し標準クラスへ移動","attributes を正しくマッピングして移動させることが推奨"],
+["Principal Class","ITSMレコードの「Configuration Item」参照フィールドに表示されるCIをフィルタリング","例：「Servers」をPrincipal Classに設定するとITSMレコードでサーバー関連CIのみが表示される"],
+["Managed By Group","technical service offering で設定した場合は CI Class Manager の設定より優先される","クラス全体を管理する特定のグループを割り当て"],
+["Identification Rules","Name・Serial Number・Device ID・Object ID・Configuration file などで一意に識別","CI Class Manager の Identification Rule タブから管理"],
+["Reconciliation Rules","どの discovery sources が特定のCI属性を更新できるかを指定","未承認ソースによる上書きを防止。複数ソース間の優先順位を定義"],
+["Data refresh rules","上位優先度のデータソースが一定期間更新を行っていない場合のCMDBデータ更新方法を管理","Reconciliation Rules の一部として機能"],
+["Suggested Relationships","predefined recommendations（事前定義された推奨事項）","例：Provides Power for :: Receives Power From / Runs on :: Hosts。不適切例：a rack runs on a server"],
+["従来の設定方法","application navigator から各アプリケーションに直接アクセス","複数テーブルの設定を single list view で確認したい場合に有用"],
+],
+q:[
+{t:"基礎",q:"CI Class Manager の Centralized Management の利点として正しいものはどれか？",o:["CIの財務価値を自動計算する","tree-view format でCMDBクラス階層を一元的に表示・管理できる","すべてのCIを自動削除する","ネットワークデバイスを自動検出する"],a:1,e:"CI Class Manager の Centralized Management は tree-view format でCMDBクラス階層を一元的に表示・管理できる。"},
+{t:"基礎",q:"新しい CMDB クラスを作成できるロールとして正しいものはどれか？",o:["すべてのユーザー","sn_cmdb_admin and personalize_dictionary または admin ロールを持つユーザーのみ","itil ロールを持つユーザーのみ","CMDB チームのすべてのメンバー"],a:1,e:"sn_cmdb_admin and personalize_dictionary または admin ロールを持つユーザーのみが新しいCMDBクラスを作成できる。"},
+{t:"基礎",q:"Principal Class の説明として正しいものはどれか？",o:["CIの財務価値を管理するクラス","ITSMレコードの「Configuration Item」参照フィールドに表示されるCIをフィルタリングし関連するCIのみを表示する","すべてのCIを格納する最上位クラス","削除予定のクラスを示すフラグ"],a:1,e:"Principal Class は ITSMレコードの「Configuration Item」参照フィールドに表示されるCIをフィルタリングし、関連するCIのみを表示することで選択プロセスを簡素化する。"},
+{t:"基礎",q:"Managed By Group の優先順位として正しいものはどれか？",o:["CI Class Manager の設定が常に優先される","technical service offering で設定した場合はそちらが CI Class Manager の設定より優先される","どちらも同じ優先順位","最後に設定した値が優先される"],a:1,e:"Managed By Group は technical service offering で設定した場合、CI Class Manager の設定より優先される。"},
+{t:"引っ掛け",q:"新しい CMDB クラスの作成に関して正しいものはどれか？",o:["自由に作成でき影響はない","慎重に行うべきで、まず CMDB CI Class Models をインストールして既存クラスを確認し、なければ extend することを推奨","admin ロールがあれば自由に作成してよい","クラス数が多いほど CMDB の品質が向上する"],a:1,e:"新しいCMDBクラスの作成は慎重に。まず CMDB CI Class Models をインストールして既存クラスを確認し、必要であれば extend することを推奨する。"},
+{t:"意地悪",q:"Suggested Relationships の不適切な例として原文に記載されているものはどれか？",o:["Rack provides power for a server","Database runs on a server","a rack runs on a server と a server runs on a database","Server hosts a database"],a:2,e:"原文では「a rack runs on a server」と「a server runs on a database」の2つが不適切な relationship の例として挙げられている。"},
+{t:"試験対策",q:"CI Class Manager の主な利点として含まれないものはどれか？",o:["Centralized Management","Health and Compliance","Financial Management","Improved Data Accuracy"],a:2,e:"CI Class Manager の主な利点は Centralized Management・Class Definitions and Settings・Hierarchy and Relationships・Attributes and Rules Management・Health and Compliance・Extensibility・Improved Data Accuracy の7つ。Financial Management は含まれない。"},
+]});
+// Course 2 Lesson 2
+L.push({c:"Course 2",l:"2-2",t:"IRE（Identification and Reconciliation Engine）概要",
+s:`IRE（Identification and Reconciliation Engine・識別と照合エンジン）は CMDBを維持するために payloads（ペイロード）を処理する framework。新しいCIの作成と既存CIの更新を担う。
+
+複数ソース（Discovery・AWS・SCCM など）からのデータ取り込みで、最後に更新したソースによってデータ属性が flop back and forth（行き来）する問題が生じる。IRE はこの問題を解決する。
+
+IRE は CMDB への healthy data 取り込みにおいて crucial（不可欠）な中心的コンポーネント。accurate and consistent data の確保・duplicate CIs の削減・CMDBの integrity の維持・unauthorized data sources からの更新の防止を実現。
+
+4つのコア機能：
+・Identification（識別）：CIがCMDB内に存在するか newly discovered CI かを判断。identification rules に基づいてattributes からCIを一意に識別
+・Reconciliation（照合）：複数データソースからのCIデータを照合・統合
+・Deduplication（重複排除）：重複CIを検出・解決（後続レッスンで詳細）
+・Reclassification（再分類）：CIを適切なクラスに再分類（後続レッスンで詳細）
+
+IRE は centralized set of APIs を提供。データソースは CMDB に直接書き込まず APIs を呼び出す→inconsistencies（不整合）を防止。
+
+Identification Rules と Reconciliation Rules はデータ取り込み時に連携して duplicate CI records の防止・CI attributes の照合・authoritative data sources のみがCIを更新できることを確保する。`,
+p:[
+["IREの定義","CMDBを維持するために payloads を処理する framework","新しいCIの作成と既存CIの更新を担う"],
+["IREが解決する課題","データ属性が flop back and forth（行き来）する問題を解決","複数ソース（Discovery・AWS・SCCM）からのデータ取り込みで発生する問題"],
+["IREの役割","healthy data のCMDBへの取り込みにおいて crucial（不可欠）な中心的コンポーネント","accurate and consistent data の確保・duplicate CIs の削減・integrity の維持"],
+["コア機能①：Identification","CIがCMDB内に存在するか newly discovered CI かを判断","identification rules に基づいて attributes からCIを一意に識別"],
+["コア機能②：Reconciliation","複数データソースからのCIデータを照合・統合","後続レッスンで詳細を扱う"],
+["コア機能③：Deduplication","重複CIを検出・解決","後続の CMDB health と governance レッスンで詳細を扱う"],
+["コア機能④：Reclassification","CIを適切なクラスに再分類","後続の CMDB health と governance レッスンで詳細を扱う"],
+["Data Ingestion via the IRE","IRE は centralized set of APIs（集中管理されたAPIセット）を提供","Discovery・Service Graph Connectors・IntegrationHub ETL などと互換性あり"],
+["IREのデータフロー","データソースは CMDB に直接書き込まず APIs を呼び出す","duplicate CIs や unauthorized data sources からの更新などの inconsistencies を防止"],
+["Overall IRE Process Flow","Identification Rules と Reconciliation Rules がデータ取り込み時に連携","duplicate CI records 防止・CI attributes 照合・authoritative data sources のみがCIを更新できることを確保"],
+["IREの効果","CMDBの overall quality と reliability の向上","better decision-making と streamlined IT operations を実現"],
+],
+q:[
+{t:"基礎",q:"IRE の定義として正しいものはどれか？",o:["ネットワーク監視専用のエンジン","CMDBを維持するために payloads を処理する framework。新しいCIの作成と既存CIの更新を担う","有償ライセンスが必要なセキュリティツール","ServiceNow Discovery の別名"],a:1,e:"IRE（Identification and Reconciliation Engine）は CMDB を維持するために payloads を処理する framework である。"},
+{t:"基礎",q:"IRE の4つのコア機能として正しいものはどれか？",o:["Plan・Build・Run・Optimize","Identification・Reconciliation・Deduplication・Reclassification","Ingest・Govern・Insight・Report","Discover・Map・Analyze・Resolve"],a:1,e:"IRE の4つのコア機能は Identification・Reconciliation・Deduplication・Reclassification である。"},
+{t:"基礎",q:"IRE のデータフローとして正しいものはどれか？",o:["データソース→CMDB に直接書き込み→IRE が後から処理","データソース→IRE の APIs を呼び出し→IRE がデータを処理→CMDBに格納","データソース→ユーザーが手動で承認→CMDBに格納","データソース→ServiceNow サポートが確認→CMDBに格納"],a:1,e:"データソースは CMDB に直接書き込まず、まず IRE の APIs を呼び出す。直接書き込みは inconsistencies の原因となる。"},
+{t:"引っ掛け",q:"データソースが CMDB にデータを書き込む方法として正しいものはどれか？",o:["データソースは CMDB に直接書き込む","データソースは CMDB に直接書き込まず IRE の APIs を呼び出す","IRE を通さずに直接書き込む方が効率的","毎回 ServiceNow サポートに承認を求める"],a:1,e:"データソースは CMDB に直接書き込まず IRE の APIs を呼び出す。直接書き込みは inconsistencies の原因となる。"},
+{t:"意地悪",q:"IRE が対応するデータソースとして原文に記載されているものはどれか？",o:["Oracle・SAP・Salesforce","Discovery・AWS・SCCM","GitHub・Jenkins・Ansible","Splunk・Dynatrace・Datadog"],a:1,e:"原文では IRE が対応するデータソースの例として Discovery・AWS・SCCM が挙げられている。"},
+{t:"試験対策",q:"IRE を使用することで実現できることの正しい組み合わせはどれか？",o:["CIの財務価値の自動計算","accurate and consistent data の確保・duplicate CIs の削減・integrity の維持・unauthorized data sources からの更新の防止","すべての IT 運用の完全自動化","CMDBへのすべてのデータの一元集約"],a:1,e:"IRE を使用することで accurate and consistent data の確保・duplicate CIs の削減・integrity の維持・unauthorized data sources からの更新の防止が実現される。"},
+]});
+// Course 2 Lesson 3
+L.push({c:"Course 2",l:"2-3",t:"Identification Rules（識別ルール）",
+s:`Identification Rules（識別ルール）は CMDBの integrity と accuracy を確保するためにCIを一意に識別し duplicate records の作成を防止する。
+
+Benefits：Data Integrity（duplicate CIs を防止）・Consistency（centralized method）・Efficiency（自動化）・Improved Data Quality
+
+識別プロセス：Data Ingestion → Attribute Matching → Duplicate Prevention の順。CIが CMDB で更新される前に実行。マッチ→既存CI更新 / マッチなし→新規CI作成。
+
+Duplicate CIs：単一のCIを表す重複CIがCMDB内に存在する状態。
+Overloaded CIs：逆の問題で、異なるCIが同一のCIとして識別され1つのCIしか作成されない状態。
+
+Hardware Rule：すべてのハードウェアの挿入・更新を管理するデフォルトルール。識別ステップ：①serial_number＋serial_number_type → ②serial_number → ③name → ④mac_address＋name
+
+Discovery Source フィールドが空の場合はデータが IRE を通過していないことを示し重複が発生しやすくなる。
+
+Attribute Flapping（属性フラッピング）：複数のデータソースが同一属性を異なる値で更新し値が行き来する現象。reconciliation rules で防止できる。
+
+有効な識別ルールの2条件：①criterion attributes がCIに対して unique（一意）であること ②CIのライフタイム全体を通じて変化しないこと（IP address は変化するため不適切）
+
+良い識別例：Cfg File Path または Installation Directory。Independent checkbox を非選択でホストに依存させると更に有効。
+悪い識別例：Name（Overloaded CI の原因）・Version（変化するため不適切）
+
+Optional IRE Condition：非 lookup 型フィールドへの拡張には glide.identification_engine.enable_identifier_optional_condition を true に設定。
+
+IRE がサポートする非CMDBテーブル（base system に preset されているもののみ）：Location [cmn_location]・Department [cmn_department]・Cost Center [cmn_cost_center]・Building [cmn_building]・User [sys_user]・Group [sys_user_group]。CI Class Manager では管理不可。各テーブルのリストビューで直接管理。各テーブルに1つの identification rule のみ関連付け可能。`,
+p:[
+["定義","Identification Rules はCIを一意に識別し duplicate records の作成を防止する","CMDBの integrity と accuracy を確保するために重要"],
+["Benefits","Data Integrity・Consistency・Efficiency・Improved Data Quality","CI識別プロセスを自動化し手動作業とエラーを削減"],
+["識別プロセス","Data Ingestion → Attribute Matching → Duplicate Prevention の順","CIが CMDB で更新される前に実行。マッチ→既存CI更新 / マッチなし→新規CI作成"],
+["Duplicate CIs","単一のCIを表す重複CIがCMDB内に存在する状態","識別ルールが変化しない identifier entries でCIを一意に表現していない場合に発生"],
+["Overloaded CIs","Duplicate CIs とは逆の問題。異なるCIが同一CIとして識別され1つのCIが作成される","複数のCIが作成されるべきところ1つのCIしか作成されない状態"],
+["Hardware Rule","すべてのハードウェアの挿入・更新を管理するデフォルトルール","Hardware [cmdb_ci_hardware] テーブルおよびその拡張テーブルに適用"],
+["Hardware Rule 識別ステップ","①serial_number＋serial_number_type → ②serial_number → ③name → ④mac_address＋name","マッチ→CI更新 / マッチなし→新規CI作成"],
+["Discovery Source フィールド","空の場合はデータが IRE を通過していないことを示す","重複が発生しやすくなるため確認が必要"],
+["Attribute Flapping","複数のデータソースが同一属性を異なる値で更新し値が行き来する現象","reconciliation rules を設定することで防止できる"],
+["有効な識別ルールの条件①","criterion attributes がそのCIに対して unique（一意）であること","例：serial number・host name・install directory・config file path"],
+["有効な識別ルールの条件②","criterion attributes がCIのライフタイム全体を通じて変化しないこと","例：IP address は変化する可能性があるため不適切"],
+["悪い識別ルールの例","Name→Overloaded CI が発生 / Version→変化するため不適切","同一サーバー上の複数 Tomcat インスタンスが同じ名前を持つ場合に発生"],
+["良い識別ルールの例","Cfg File Path または Installation Directory を使用","Independent checkbox を非選択でホストに依存させると更に有効"],
+["Optional IRE Condition","非 lookup 型フィールドへの拡張：glide.identification_engine.enable_identifier_optional_condition を true に設定","Advanced Options セクションが利用可能になる"],
+["IRE サポート対象の非CMDBテーブル","Location・Department・Cost Center・Building・User・Group（base system に preset されているもののみ）","CI Class Manager では管理不可。各テーブルのリストビューで直接管理"],
+],
+q:[
+{t:"基礎",q:"Attribute Matching の結果として正しいものはどれか？",o:["マッチが見つかれば新規CIを作成し見つからなければ既存CIを更新する","マッチが見つかれば既存CIを更新し見つからなければ新規CIレコードを作成する","常に新規CIを作成する","常に既存CIを更新する"],a:1,e:"マッチが見つかれば既存CIを更新し、見つからなければ新しいCIレコードを作成する。"},
+{t:"基礎",q:"Duplicate CIs と Overloaded CIs の違いとして正しいものはどれか？",o:["両者は同じ問題","Duplicate CIs は単一CIを表す複数レコードが存在する状態、Overloaded CIs は複数のCIが1つのCIとして登録される逆の問題","Duplicate CIs は財務問題、Overloaded CIs は技術問題","どちらも発生しない"],a:1,e:"Duplicate CIs は単一CIを表す重複レコードが存在する状態。Overloaded CIs はその逆で複数のCIが1つのCIとして登録される状態。"},
+{t:"基礎",q:"Hardware Rule の識別ステップの正しい順序はどれか？",o:["name → serial_number → mac_address","serial_number＋serial_number_type → serial_number → name → mac_address＋name","mac_address → name → serial_number","すべての属性を同時にマッチする"],a:1,e:"Hardware Rule の識別ステップは ①serial_number＋serial_number_type → ②serial_number → ③name → ④mac_address＋name の順。"},
+{t:"基礎",q:"有効な identification rule の2つの条件として正しいものはどれか？",o:["財務価値があることと頻繁に変化すること","criterion attributes が unique であることと CIのライフタイム全体を通じて変化しないこと","すべてのCIで共通の属性を使用することとデータソースが多いこと","自動で生成されることと手動更新が不要なこと"],a:1,e:"有効な識別ルールの2条件：①criterion attributes が unique であること ②CIのライフタイム全体を通じて変化しないこと（IP address は変化するため不適切）。"},
+{t:"基礎",q:"Tomcat アプリケーションの識別に最も推奨される identifier entry はどれか？",o:["Name（アプリケーション名）","Version（バージョン番号）","Cfg File Path または Installation Directory。Independent checkbox を非選択でホストに依存させると更に有効","IP address"],a:2,e:"Cfg File Path または Installation Directory が推奨。各インスタンスが異なるパスを持つため一意の識別が可能。Name は Overloaded CI の原因、Version は変化するため不適切。"},
+{t:"引っ掛け",q:"Attribute Flapping を防止するために使用するのはどれか？",o:["Identification Rules を変更する","Reconciliation Rules（照合ルール）を設定する","CIを手動で更新する","Discovery Source フィールドを削除する"],a:1,e:"Attribute Flapping は Reconciliation Rules（照合ルール）を設定することで防止できる。Identification Rules ではない点に注意。"},
+{t:"意地悪",q:"IRE がサポートする非CMDBテーブルとして原文に記載されていないものはどれか？",o:["Location [cmn_location]","User [sys_user]","Group [sys_user_group]","Incident [incident]"],a:3,e:"IRE がサポートする非CMDBテーブルは Location・Department・Cost Center・Building・User・Group の6つ。Incident は含まれていない。"},
+{t:"試験対策",q:"非CMDBテーブルの IRE 関連ルール管理方法として正しいものはどれか？",o:["CI Class Manager から管理できる","CI Class Manager は使用不可。各テーブルのリストビューで直接管理する。各テーブルに1つの identification rule のみ関連付け可能","CMDB Health Dashboard から管理できる","ServiceNow Store からアプリをインストールして管理できる"],a:1,e:"CI Class Manager は非CMDBテーブルの IRE 関連ルールの管理に使用できない。各テーブルのリストビューで直接管理する。"},
+]});
+
+// ════════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════════
+function buildQuizTSV(quiz){
+  return quiz.map((q,i)=>{
+    const a=String.fromCharCode(65+q.a);
+    return [q.t,`Q${i+1}`,q.q,q.o[0],q.o[1],q.o[2],q.o[3],a,q.e].join('\t');
+  }).join('\n');
+}
+function buildPointsTSV(pts){
+  return 'カテゴリ\tポイント\t補足\n'+pts.map(p=>p.join('\t')).join('\n');
+}
+function cp(text,btnId){
+  navigator.clipboard.writeText(text).then(()=>{
+    const b=document.getElementById(btnId);
+    const orig=b.textContent;
+    b.textContent='✅ コピー完了！';
+    b.classList.add('cp');
+    setTimeout(()=>{b.textContent=orig;b.classList.remove('cp');},2500);
+  });
+}
+
+const cnt=document.getElementById('cnt');
+const courses={};
+L.forEach(l=>{if(!courses[l.c])courses[l.c]=[];courses[l.c].push(l);});
+
+Object.entries(courses).forEach(([course,lessons])=>{
+  const sec=document.createElement('div');
+  sec.className='stitle';
+  sec.textContent=course;
+  cnt.appendChild(sec);
+
+  lessons.forEach((l,idx)=>{
+    const bid=`${course.replace(/\s/g,'')}_${l.l.replace(/\./g,'')}_${idx}`;
+    const block=document.createElement('div');
+    block.className='lb';
+    block.innerHTML=`
+      <div class="lh">
+        <span class="chip">${l.c} · ${l.l}</span>
+        <span class="lt">${l.t}</span>
+        <span class="qc">${l.q.length}問 / ポイント${l.p.length}行</span>
+      </div>
+      <div class="info">基本情報 → コース:「${l.c}」 レッスン:「${l.l}」 タイトル:「${l.t}」</div>
+      <div class="br" style="margin-top:8px;">
+        <button class="btn" id="sum_${bid}" onclick="cp(L[${L.indexOf(l)}].s,'sum_${bid}')">📄 要約コピー</button>
+        <button class="btn" id="pts_${bid}" onclick="cp(buildPointsTSV(L[${L.indexOf(l)}].p),'pts_${bid}')">📊 ポイントコピー</button>
+        <button class="btn btnp" id="qz_${bid}" onclick="cp(buildQuizTSV(L[${L.indexOf(l)}].q),'qz_${bid}')">❓ 問題コピー</button>
+      </div>
+    `;
+    cnt.appendChild(block);
+  });
+});
+</script>
+</body>
+</html>
