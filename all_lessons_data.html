@@ -504,38 +504,120 @@ q:[
 ]});
 
 // ════════════════════════════════════════════════
-// RENDER
+// RENDER & SEND
 // ════════════════════════════════════════════════
-function buildQuizTSV(quiz){
-  return quiz.map((q,i)=>{
-    const a=String.fromCharCode(65+q.a);
-    return [q.t,`Q${i+1}`,q.q,q.o[0],q.o[1],q.o[2],q.o[3],a,q.e].join('\t');
-  }).join('\n');
-}
-function buildPointsTSV(pts){
-  return 'カテゴリ\tポイント\t補足\n'+pts.map(p=>p.join('\t')).join('\n');
-}
-function cp(text,btnId){
-  navigator.clipboard.writeText(text).then(()=>{
-    const b=document.getElementById(btnId);
-    const orig=b.textContent;
-    b.textContent='✅ コピー完了！';
-    b.classList.add('cp');
-    setTimeout(()=>{b.textContent=orig;b.classList.remove('cp');},2500);
-  });
+
+// アプリ側ウィンドウの参照
+let appWindow = null;
+
+// アプリURLを同じリポジトリのindex.htmlと仮定（同一オリジン）
+function getAppUrl(){
+  const here = location.href;
+  return here.replace('all_lessons_data.html','').replace(/\/$/, '') + '/';
 }
 
+// アプリを新しいタブで開く（または既存タブを使う）
+function openApp(){
+  appWindow = window.open(getAppUrl(), 'cmdb_study_app');
+  showToast('アプリを開いています…タブが開いたら送信ボタンを押してください', '#1f6feb');
+}
+
+// 1レッスン送信
+function sendLesson(idx, btnId){
+  const l = L[idx];
+  const payload = {
+    type: 'CMDB_IMPORT_LESSON',
+    lesson: {
+      course: l.c, lesson: l.l, title: l.t,
+      summary: l.s,
+      points: l.p,
+      quiz: l.q.map(q => ({
+        type: q.t, q: q.q, opts: q.o, ans: q.a, exp: q.e
+      }))
+    }
+  };
+
+  if (!appWindow || appWindow.closed) {
+    appWindow = window.open(getAppUrl(), 'cmdb_study_app');
+    // ウィンドウが読み込まれてから送信
+    const btn = document.getElementById(btnId);
+    btn.textContent = '⏳ アプリ起動中…';
+    setTimeout(() => {
+      trySend(payload, btnId, 0);
+    }, 2500);
+  } else {
+    trySend(payload, btnId, 0);
+  }
+}
+
+// 全レッスン一括送信
+function sendAll(btnId){
+  const payload = {
+    type: 'CMDB_IMPORT_ALL',
+    lessons: L.map(l => ({
+      course: l.c, lesson: l.l, title: l.t,
+      summary: l.s, points: l.p,
+      quiz: l.q.map(q => ({ type: q.t, q: q.q, opts: q.o, ans: q.a, exp: q.e }))
+    }))
+  };
+
+  if (!appWindow || appWindow.closed) {
+    appWindow = window.open(getAppUrl(), 'cmdb_study_app');
+    const btn = document.getElementById(btnId);
+    btn.textContent = '⏳ アプリ起動中…';
+    setTimeout(() => { trySend(payload, btnId, 0); }, 2500);
+  } else {
+    trySend(payload, btnId, 0);
+  }
+}
+
+function trySend(payload, btnId, retry){
+  try {
+    appWindow.postMessage(payload, '*');
+    const btn = document.getElementById(btnId);
+    if(btn){ btn.textContent = '✅ 送信完了！'; btn.classList.add('cp');
+      setTimeout(()=>{ btn.textContent = btn.dataset.orig || '🚀 アプリへ送信'; btn.classList.remove('cp'); }, 3000); }
+  } catch(e) {
+    if(retry < 3){ setTimeout(()=>trySend(payload, btnId, retry+1), 800); }
+    else { showToast('送信に失敗しました。アプリタブを開いてから再試行してください', '#da3633'); }
+  }
+}
+
+function showToast(msg, color='#58a6ff'){
+  const t=document.createElement('div');
+  t.style.cssText=`position:fixed;bottom:20px;right:20px;background:#21262d;border:1px solid ${color};color:#e6edf3;padding:10px 18px;border-radius:8px;font-size:13px;z-index:300;`;
+  t.textContent=msg;document.body.appendChild(t);
+  setTimeout(()=>t.remove(),3000);
+}
+
+// postMessage 完了受信
+window.addEventListener('message', e => {
+  if(e.data?.type==='CMDB_IMPORT_DONE') showToast(`✅ 「${e.data.title}」をアプリに追加しました`);
+  if(e.data?.type==='CMDB_IMPORT_ALL_DONE') showToast(`✅ ${e.data.count}レッスンをアプリに追加しました`);
+});
+
+// ── DOM 構築 ──────────────────────────────────
 const cnt=document.getElementById('cnt');
 const courses={};
 L.forEach(l=>{if(!courses[l.c])courses[l.c]=[];courses[l.c].push(l);});
 
+// 一括送信ボタン
+const allRow = document.createElement('div');
+allRow.style.cssText='display:flex;gap:8px;align-items:center;margin-bottom:20px;flex-wrap:wrap;';
+allRow.innerHTML=`
+  <button class="btn btnp" style="padding:8px 20px;font-size:13px;" onclick="openApp()">🔗 アプリを開く</button>
+  <button class="btn" id="send_all" data-orig="🚀 全レッスンをアプリへ送信" style="padding:8px 20px;font-size:13px;border-color:#3fb950;color:#3fb950;" onclick="sendAll('send_all')">🚀 全レッスンをアプリへ送信</button>
+  <span style="font-size:11px;color:#6e7681;">※先に「アプリを開く」でアプリタブを開いてから送信してください</span>
+`;
+cnt.appendChild(allRow);
+
 Object.entries(courses).forEach(([course,lessons])=>{
   const sec=document.createElement('div');
-  sec.className='stitle';
-  sec.textContent=course;
+  sec.className='stitle';sec.textContent=course;
   cnt.appendChild(sec);
 
   lessons.forEach((l,idx)=>{
+    const globalIdx=L.indexOf(l);
     const bid=`${course.replace(/\s/g,'')}_${l.l.replace(/\./g,'')}_${idx}`;
     const block=document.createElement('div');
     block.className='lb';
@@ -545,11 +627,9 @@ Object.entries(courses).forEach(([course,lessons])=>{
         <span class="lt">${l.t}</span>
         <span class="qc">${l.q.length}問 / ポイント${l.p.length}行</span>
       </div>
-      <div class="info">基本情報 → コース:「${l.c}」 レッスン:「${l.l}」 タイトル:「${l.t}」</div>
       <div class="br" style="margin-top:8px;">
-        <button class="btn" id="sum_${bid}" onclick="cp(L[${L.indexOf(l)}].s,'sum_${bid}')">📄 要約コピー</button>
-        <button class="btn" id="pts_${bid}" onclick="cp(buildPointsTSV(L[${L.indexOf(l)}].p),'pts_${bid}')">📊 ポイントコピー</button>
-        <button class="btn btnp" id="qz_${bid}" onclick="cp(buildQuizTSV(L[${L.indexOf(l)}].q),'qz_${bid}')">❓ 問題コピー</button>
+        <button class="btn btnp" id="send_${bid}" data-orig="🚀 アプリへ送信"
+          onclick="sendLesson(${globalIdx},'send_${bid}')">🚀 アプリへ送信</button>
       </div>
     `;
     cnt.appendChild(block);

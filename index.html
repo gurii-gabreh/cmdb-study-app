@@ -680,6 +680,66 @@ function showToast(msg) {
   setTimeout(() => t.remove(), 2500);
 }
 
+// ── postMessage receiver（データエクスポートファイルからの送信を受信）──
+window.addEventListener('message', (event) => {
+  // セキュリティ：同一オリジンのみ受け付ける（GitHub Pages 上では同じドメイン）
+  if (event.data && event.data.type === 'CMDB_IMPORT_LESSON') {
+    const d = event.data.lesson;
+    if (!d || !d.course || !d.lesson || !d.title) return;
+
+    // 既存レッスンの重複チェック（同コース・同レッスン番号）
+    const exists = state.lessons.find(l => l.course === d.course && l.lesson === d.lesson);
+    if (exists) {
+      if (!confirm(`「${d.course} ${d.lesson} ${d.title}」はすでに存在します。上書きしますか？`)) return;
+      state.lessons = state.lessons.filter(l => !(l.course === d.course && l.lesson === d.lesson));
+      delete state.quizState[exists.id];
+      delete state.errors[exists.id];
+    }
+
+    const id = d.course.replace(/\s/g,'') + '_' + d.lesson.replace(/\./g,'') + '_' + Date.now();
+    const newLesson = {
+      id, course: d.course, lesson: d.lesson, title: d.title,
+      summary: d.summary || '',
+      points: d.points || [],
+      quiz: d.quiz || []
+    };
+    state.lessons.push(newLesson);
+    state.activeLesson = id;
+    save();
+    renderSidebar();
+    renderContent();
+    showToast(`✅ 「${d.title}」をインポートしました（問題:${newLesson.quiz.length}問）`);
+
+    // 送信元に完了を通知
+    event.source.postMessage({ type: 'CMDB_IMPORT_DONE', lesson: d.lesson, title: d.title }, event.origin);
+  }
+
+  // 全レッスン一括インポート
+  if (event.data && event.data.type === 'CMDB_IMPORT_ALL') {
+    const lessons = event.data.lessons;
+    if (!Array.isArray(lessons)) return;
+    let count = 0;
+    lessons.forEach(d => {
+      if (!d || !d.course || !d.lesson || !d.title) return;
+      const exists = state.lessons.find(l => l.course === d.course && l.lesson === d.lesson);
+      if (exists) {
+        state.lessons = state.lessons.filter(l => !(l.course === d.course && l.lesson === d.lesson));
+        delete state.quizState[exists.id];
+        delete state.errors[exists.id];
+      }
+      const id = d.course.replace(/\s/g,'') + '_' + d.lesson.replace(/\./g,'') + '_' + Date.now() + '_' + count;
+      state.lessons.push({ id, course: d.course, lesson: d.lesson, title: d.title,
+        summary: d.summary || '', points: d.points || [], quiz: d.quiz || [] });
+      count++;
+    });
+    save();
+    renderSidebar();
+    renderContent();
+    showToast(`✅ ${count}レッスンを一括インポートしました`);
+    event.source.postMessage({ type: 'CMDB_IMPORT_ALL_DONE', count }, event.origin);
+  }
+});
+
 // ── Init ───────────────────────────────────────────────
 load();
 renderSidebar();
