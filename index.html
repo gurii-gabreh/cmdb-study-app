@@ -972,12 +972,18 @@ async function gistLoad() {
     if (!file) throw new Error(GIST_FILENAME + ' が見つかりません');
     const data = JSON.parse(file.content);
     if (data.comments) {
+      // Gistのキーをマイグレーション（タイムスタンプ付き→固定キー）
+      const migratedComments = {};
+      Object.keys(data.comments).forEach(k => {
+        const fixed = k.replace(/^([^_]+_[^_]+)_\d{13}_(\d+_\d+)$/, '$1_$2');
+        migratedComments[fixed] = data.comments[k];
+      });
       // 既存のコメントとマージ（Gist側を優先）
-      state.comments = Object.assign({}, state.comments, data.comments);
+      state.comments = Object.assign({}, state.comments, migratedComments);
       save();
       renderContent();
       gistSetStatus('✅ 読込完了', 'ok');
-      showToast('☁️ メモをGistから読み込みました（' + Object.keys(data.comments).length + '件）');
+      showToast('☁️ メモをGistから読み込みました（' + Object.keys(migratedComments).length + '件）');
     }
   } catch(e) {
     gistSetStatus('❌ ' + e.message, 'err');
