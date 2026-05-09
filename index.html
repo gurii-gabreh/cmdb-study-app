@@ -269,13 +269,15 @@ function load() {
     state.dataSourceUrl = s.dataSourceUrl || '';
     state.gistToken = s.gistToken || '';
     state.gistId = s.gistId || '';
-    // コメントキーのマイグレーション（タイムスタンプ付き→固定キー）
+    // コメントキーのマイグレーション（旧形式→新形式）
     if (s.comments) {
       const migratedComments = {};
       Object.keys(s.comments).forEach(k => {
-        // Course1_1-1_1778297231376_0_2 → Course1_1-1_0_2
-        const fixed = k.replace(/^([^_]+_[^_]+)_\d{13}_(\d+_\d+)$/, '$1_$2');
-        migratedComments[fixed] = s.comments[k];
+        // Course1_1-1_1778297231376_0_2 → Course1_1-1_2
+        // Course1_1-1_0_2 → Course1_1-1_2
+        let nk = k.replace(/^([A-Za-z]+\d+_[\d\-]+)_\d{13}_\d+_(\d+)$/, '$1_$2');
+        nk = nk.replace(/^([A-Za-z]+\d+_[\d\-]+)_\d{1,3}_(\d+)$/, '$1_$2');
+        migratedComments[nk] = s.comments[k];
       });
       state.comments = migratedComments;
     }
@@ -522,12 +524,12 @@ function renderQuiz(el, lesson, isReview) {
         : `<span class="exp-label">${label}</span>正解は「${String.fromCharCode(65+q.ans)}：${annotatedOptCorrect}」です。<br><br>【なぜ不正解か】あなたは「${String.fromCharCode(65+qs.wrongs[qi])}：${annotatedOptWrong}」を選びましたが、これは誤りです。<br><br>【正解の理由】${annotatedExp}`;
       html += `<div class="exp ${expCls}">${reason}</div>`;
       // コメント欄（回答後のみ表示）
-      const commentKey = lid + '_' + qi;
-      const savedComment = getComment(lid, qi);
+      const cKey = lesson.course.replace(/\s/g,'') + '_' + lesson.lesson + '_' + qi;
+      const savedComment = (state.comments||{})[cKey] || '';
       html += `<div class="comment-box">
         <div class="comment-label">📝 メモ・コメント（内容は自動保存されます）</div>
         <textarea class="comment-ta" id="cmt_${qkey}_${qi}" placeholder="ここに気づきや疑問点を記録できます..."
-          oninput="saveComment('${lid}',${qi},this.value)">${escHtml(savedComment)}</textarea>
+          oninput="saveCommentFixed('${lesson.course.replace(/\s/g,'')}','${lesson.lesson}',${qi},this.value)">${escHtml(savedComment)}</textarea>
       </div>`;
     }
 
@@ -663,7 +665,7 @@ function importLesson() {
   const pointsRaw = document.getElementById('imp-points').value.trim();
   const quizRaw = document.getElementById('imp-quiz').value.trim();
 
-  const id = course.replace(/\s/g,'') + '_' + lesson.replace(/\./g,'');
+  const id = course.replace(/\s/g,'') + '_' + lesson.replace(/\./g,'') + '_' + Date.now();
 
   // Parse points
   const points = [];
@@ -780,8 +782,30 @@ function addJpAnnotations(text) {
 }
 
 // ── コメント状態 ──────────────────────────────────────────
+function saveCommentFixed(course, lesson, qi, text) {
+  if (!state.comments) state.comments = {};
+  const key = course + '_' + lesson + '_' + qi;
+  state.comments[key] = text;
+  save();
+}
+
 function getComment(lid, qi) {
-  return ((state.comments||{})[lid+'_'+qi]) || '';
+  const newKey = lid + '_' + qi;
+  if (state.comments && state.comments[newKey] !== undefined) return state.comments[newKey];
+  // 旧キー互換: lid_0_qi, lid_1_qi など
+  if (state.comments) {
+    for (let i = 0; i < 100; i++) {
+      const oldKey = lid + '_' + i + '_' + qi;
+      if (state.comments[oldKey] !== undefined) {
+        // 旧キーを新キーに移行
+        state.comments[newKey] = state.comments[oldKey];
+        delete state.comments[oldKey];
+        save();
+        return state.comments[newKey];
+      }
+    }
+  }
+  return '';
 }
 function saveComment(lid, qi, text) {
   if (!state.comments) state.comments = {};
@@ -830,7 +854,7 @@ window.addEventListener('message', (event) => {
       delete state.errors[exists.id];
     }
 
-    const id = d.course.replace(/\s/g,'') + '_' + d.lesson.replace(/\./g,'');
+    const id = d.course.replace(/\s/g,'') + '_' + d.lesson.replace(/\./g,'') + '_' + Date.now();
     const newLesson = {
       id, course: d.course, lesson: d.lesson, title: d.title,
       summary: d.summary || '',
@@ -861,7 +885,7 @@ window.addEventListener('message', (event) => {
         delete state.quizState[exists.id];
         delete state.errors[exists.id];
       }
-      const id = d.course.replace(/\s/g,'') + '_' + d.lesson.replace(/\./g,'');
+      const id = d.course.replace(/\s/g,'') + '_' + d.lesson.replace(/\./g,'') + '_' + Date.now();
       state.lessons.push({ id, course: d.course, lesson: d.lesson, title: d.title,
         summary: d.summary || '', points: d.points || [], quiz: normalizeQuiz(d.quiz) });
       count++;
@@ -984,18 +1008,20 @@ async function gistLoad() {
     if (!file) throw new Error(GIST_FILENAME + ' が見つかりません');
     const data = JSON.parse(file.content);
     if (data.comments) {
-      // Gistのキーをマイグレーション（タイムスタンプ付き→固定キー）
-      const migratedComments = {};
+      // 旧キー形式を新キー形式に変換してからマージ
+      const migrated = {};
       Object.keys(data.comments).forEach(k => {
-        const fixed = k.replace(/^([^_]+_[^_]+)_\d{13}_(\d+_\d+)$/, '$1_$2');
-        migratedComments[fixed] = data.comments[k];
+        // Course1_1-1_0_2 → Course1_1-1_2
+        // Course1_1-1_1778297231376_0_2 → Course1_1-1_2
+        let nk = k.replace(/^([A-Za-z]+\d+_[\d\-]+)_\d{13}_\d+_(\d+)$/, '$1_$2');
+        nk = nk.replace(/^([A-Za-z]+\d+_[\d\-]+)_\d{1,3}_(\d+)$/, '$1_$2');
+        migrated[nk] = data.comments[k];
       });
-      // 既存のコメントとマージ（Gist側を優先）
-      state.comments = Object.assign({}, state.comments, migratedComments);
+      state.comments = Object.assign({}, state.comments, migrated);
       save();
       renderContent();
       gistSetStatus('✅ 読込完了', 'ok');
-      showToast('☁️ メモをGistから読み込みました（' + Object.keys(migratedComments).length + '件）');
+      showToast('☁️ メモをGistから読み込みました（' + Object.keys(migrated).length + '件）');
     }
   } catch(e) {
     gistSetStatus('❌ ' + e.message, 'err');
