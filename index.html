@@ -129,6 +129,12 @@ textarea.tinput{min-height:180px;}
 .datasrc-open-btn{cursor:pointer;padding:6px 14px;background:#21262d;border:1px solid #3fb950;color:#3fb950;border-radius:6px;font-size:12px;font-weight:600;white-space:nowrap;transition:all .15s;margin-left:4px;}
 .datasrc-open-btn:hover{background:#0d2e19;border-color:#56d364;}
 .datasrc-open-btn:disabled{opacity:.4;cursor:default;}
+.gist-btn{cursor:pointer;padding:6px 14px;background:#21262d;border:1px solid #8957e5;color:#8957e5;border-radius:6px;font-size:12px;font-weight:600;white-space:nowrap;transition:all .15s;margin-left:4px;}
+.gist-btn:hover{background:#1a1038;border-color:#a371f7;color:#a371f7;}
+.gist-status{font-size:11px;padding:2px 8px;border-radius:4px;margin-left:4px;display:inline-block;}
+.gist-ok{background:#0d2e19;color:#3fb950;border:1px solid #3fb950;}
+.gist-err{background:#2e0d0d;color:#f85149;border:1px solid #f85149;}
+.gist-ing{background:#1c2128;color:#8b949e;border:1px solid #30363d;}
 .datasrc-indicator{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;background:#3fb950;}
 .exp-ng{background:var(--red-bg);border:1px solid var(--red-border);color:#ff7b72;}
 .exp-label{font-weight:700;margin-right:4px;}
@@ -165,6 +171,9 @@ textarea.tinput{min-height:180px;}
       <span class="datasrc-indicator"></span>データソース更新
     </button>
     <button class="datasrc-open-btn" id="datasrc-open-btn" onclick="openDataSourceNewTab()" title="all_lessons_data.htmlを新しいタブで開く">📂 データを開く</button>
+    <button class="gist-btn" id="gist-save-btn" onclick="gistSave()" title="メモをGitHub Gistに保存">☁️ メモ保存</button>
+    <button class="gist-btn" id="gist-load-btn" onclick="gistLoad()" title="GitHub GistからメモをロードS">☁️ メモ読込</button>
+    <span class="gist-status gist-ing" id="gist-status" style="display:none;"></span>
   </div>
 </div>
 
@@ -233,7 +242,9 @@ let state = {
   history: [],       // [{lessonId, title, correct, total, date, wrongs:[]}]
   errors: {},        // lessonId -> Set of question indices that were ever wrong
   comments: {},      // 'lessonId_qi' -> comment text
-  dataSourceUrl: '' // URL of all_lessons_data.html
+  dataSourceUrl: '', // URL of all_lessons_data.html
+  gistToken: '',    // GitHub Personal Access Token
+  gistId: ''        // Gist ID（初回保存後に自動設定）
 };
 
 function save() {
@@ -256,6 +267,8 @@ function load() {
     for (const k in (s.errors || {})) state.errors[k] = new Set(s.errors[k]);
     state.comments = s.comments || {};
     state.dataSourceUrl = s.dataSourceUrl || '';
+    state.gistToken = s.gistToken || '';
+    state.gistId = s.gistId || '';
     // Restore datasource button indicator
     if (state.dataSourceUrl) {
       const ind = document.querySelector('.datasrc-indicator');
@@ -844,6 +857,127 @@ window.addEventListener('message', (event) => {
 
 // ── データソース機能 ──────────────────────────────────────
 let dataSourceWindow = null;
+
+// ── GitHub Gist メモ保存・読込 ──────────────────────────
+const GIST_FILENAME = 'cmdb_study_memo.json';
+
+function gistSetStatus(msg, type) {
+  const el = document.getElementById('gist-status');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'gist-status gist-' + type;
+  el.style.display = msg ? 'inline-block' : 'none';
+  if (type === 'ok' || type === 'err') {
+    setTimeout(() => { el.style.display = 'none'; }, 3000);
+  }
+}
+
+async function gistEnsureToken() {
+  if (state.gistToken) return state.gistToken;
+  const token = prompt('GitHub Personal Access Token を入力してください\n（gistスコープが必要です）\n\n※ここで入力したトークンはこのブラウザにのみ保存されます', '');
+  if (!token || !token.trim()) return null;
+  state.gistToken = token.trim();
+  save();
+  return state.gistToken;
+}
+
+async function gistSave() {
+  const token = await gistEnsureToken();
+  if (!token) return;
+  if (Object.keys(state.comments || {}).length === 0) {
+    showToast('保存するメモがありません');
+    return;
+  }
+  gistSetStatus('保存中...', 'ing');
+  const data = {
+    comments: state.comments,
+    savedAt: new Date().toISOString()
+  };
+  try {
+    let res;
+    if (state.gistId) {
+      // 既存Gistを更新
+      res = await fetch('https://api.github.com/gists/' + state.gistId, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': 'token ' + token,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          files: { [GIST_FILENAME]: { content: JSON.stringify(data, null, 2) } }
+        })
+      });
+    } else {
+      // 新規Gistを作成
+      res = await fetch('https://api.github.com/gists', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'token ' + token,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          description: 'CMDB Study App Memo',
+          public: false,
+          files: { [GIST_FILENAME]: { content: JSON.stringify(data, null, 2) } }
+        })
+      });
+    }
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || res.status);
+    }
+    const json = await res.json();
+    state.gistId = json.id;
+    save();
+    gistSetStatus('✅ 保存完了', 'ok');
+    showToast('☁️ メモをGistに保存しました');
+  } catch(e) {
+    gistSetStatus('❌ ' + e.message, 'err');
+    showToast('Gist保存エラー: ' + e.message);
+    // トークンが無効な場合はリセット
+    if (e.message && (e.message.includes('401') || e.message.includes('Bad credential'))) {
+      state.gistToken = '';
+      save();
+    }
+  }
+}
+
+async function gistLoad() {
+  const token = await gistEnsureToken();
+  if (!token) return;
+  if (!state.gistId) {
+    const id = prompt('Gist IDを入力してください\n（初回保存後に自動設定されます）\n\nGist URLの末尾の文字列です\n例: https://gist.github.com/xxx/[ここがID]', '');
+    if (!id || !id.trim()) return;
+    state.gistId = id.trim();
+    save();
+  }
+  gistSetStatus('読込中...', 'ing');
+  try {
+    const res = await fetch('https://api.github.com/gists/' + state.gistId, {
+      headers: { 'Authorization': 'token ' + token }
+    });
+    if (!res.ok) throw new Error('Gist取得失敗: ' + res.status);
+    const json = await res.json();
+    const file = json.files[GIST_FILENAME];
+    if (!file) throw new Error(GIST_FILENAME + ' が見つかりません');
+    const data = JSON.parse(file.content);
+    if (data.comments) {
+      // 既存のコメントとマージ（Gist側を優先）
+      state.comments = Object.assign({}, state.comments, data.comments);
+      save();
+      renderContent();
+      gistSetStatus('✅ 読込完了', 'ok');
+      showToast('☁️ メモをGistから読み込みました（' + Object.keys(data.comments).length + '件）');
+    }
+  } catch(e) {
+    gistSetStatus('❌ ' + e.message, 'err');
+    showToast('Gist読込エラー: ' + e.message);
+    if (e.message && (e.message.includes('401') || e.message.includes('Bad credential'))) {
+      state.gistToken = '';
+      save();
+    }
+  }
+}
 
 function openDataSourceNewTab() {
   const url = state.dataSourceUrl;
