@@ -848,17 +848,13 @@ let dataSourceWindow = null;
 function openDataSourceNewTab() {
   const url = state.dataSourceUrl;
   if (!url) {
-    const input = prompt(
-      '📂 all_lessons_data.html のURLを入力してください\n\n' +
-      '例（GitHub Pages）:\nhttps://あなたのユーザー名.github.io/cmdb-study-app/all_lessons_data.html',
-      ''
-    );
+    const input = prompt('all_lessons_data.html のURLを入力してください\n例: https://xxx.github.io/cmdb-study-app/all_lessons_data.html', '');
     if (!input || !input.trim()) return;
     state.dataSourceUrl = input.trim();
     save();
     const ind = document.querySelector('.datasrc-indicator');
     if (ind) ind.style.background = '#3fb950';
-    showToast('✅ URLを保存しました');
+    showToast('URL を保存しました');
     window.open(state.dataSourceUrl, '_blank');
   } else {
     window.open(url, '_blank');
@@ -870,43 +866,27 @@ function openDataSource() {
   const btn = document.getElementById('datasrc-btn');
 
   if (!url) {
-    // URLが未設定の場合はURLを入力させる
-    const input = prompt(
-      '📂 all_lessons_data.html のURLを入力してください
-
-' +
-      '例（GitHub Pages）:
-https://あなたのユーザー名.github.io/cmdb-study-app/all_lessons_data.html
-
-' +
-      '例（ローカル）:
-file:///C:/Users/xxx/all_lessons_data.html',
-      state.dataSourceUrl || ''
-    );
+    const input = prompt('all_lessons_data.html のURLを入力してください\n例: https://xxx.github.io/cmdb-study-app/all_lessons_data.html', state.dataSourceUrl || '');
     if (!input || !input.trim()) return;
     state.dataSourceUrl = input.trim();
     save();
-    showToast('✅ データソースURLを保存しました');
+    showToast('URL を保存しました');
     btn.querySelector('.datasrc-indicator').style.background = '#3fb950';
-    openDataSource(); // 再度開く
+    openDataSource();
     return;
   }
 
-  // データソースウィンドウを開く（既に開いていれば再利用）
   if (dataSourceWindow && !dataSourceWindow.closed) {
     dataSourceWindow.focus();
   } else {
-    dataSourceWindow = window.open(url, 'cmdb_datasource',
-      'width=1000,height=700,scrollbars=yes,resizable=yes');
+    dataSourceWindow = window.open(url, 'cmdb_datasource', 'width=1000,height=700,scrollbars=yes,resizable=yes');
   }
 
   if (!dataSourceWindow) {
-    // ポップアップがブロックされた場合
-    showToast('⚠️ ポップアップがブロックされました。ブラウザの設定を確認してください。');
+    showToast('ポップアップがブロックされました。ブラウザの設定を確認してください。');
     return;
   }
 
-  // ウィンドウが開くのを待ってから全レッスン送信を要求
   const checkReady = setInterval(() => {
     if (dataSourceWindow && !dataSourceWindow.closed) {
       try {
@@ -918,18 +898,11 @@ file:///C:/Users/xxx/all_lessons_data.html',
     }
   }, 500);
 
-  // 5秒後にタイムアウト
   setTimeout(() => clearInterval(checkReady), 5000);
 }
 
 function changeDataSource() {
-  const input = prompt(
-    'データソースURLを変更します
-
-現在のURL:
-' + (state.dataSourceUrl || '（未設定）'),
-    state.dataSourceUrl || ''
-  );
+  const input = prompt('データソースURLを変更します\n現在: ' + (state.dataSourceUrl || '未設定'), state.dataSourceUrl || '');
   if (input === null) return;
   state.dataSourceUrl = input.trim();
   save();
@@ -938,7 +911,7 @@ function changeDataSource() {
     const ind = btn.querySelector('.datasrc-indicator');
     if (ind) ind.style.background = state.dataSourceUrl ? '#3fb950' : '#f85149';
   }
-  showToast(state.dataSourceUrl ? '✅ URLを更新しました' : '⚠️ URLをクリアしました');
+  showToast(state.dataSourceUrl ? 'URLを更新しました' : 'URLをクリアしました');
 }
 
 // データソースボタン右クリックでURL変更
