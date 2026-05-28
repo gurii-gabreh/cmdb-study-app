@@ -122,7 +122,7 @@ textarea.tinput{min-height:180px;}
 .exp-ok{background:var(--green-bg);border:1px solid var(--green-border);color:#7ee787;}
 .comment-box{margin:8px 0 4px;padding:10px 12px;background:#161b22;border:1px solid #30363d;border-radius:6px;}
 .comment-label{font-size:11px;color:#8b949e;margin-bottom:6px;}
-.comment-ta{width:100%;min-height:64px;background:#0d1117;color:#c9d1d9;border:1px solid #30363d;border-radius:4px;padding:8px;font-size:12px;font-family:inherit;resize:vertical;line-height:1.5;}
+.comment-ta{width:100%;min-height:120px;height:auto;background:#0d1117;color:#c9d1d9;border:1px solid #30363d;border-radius:4px;padding:8px;font-size:12px;font-family:inherit;resize:vertical;line-height:1.5;overflow-y:visible;white-space:pre-wrap;word-break:break-all;}
 .comment-ta:focus{outline:none;border-color:#58a6ff;}
 .datasrc-btn{cursor:pointer;padding:6px 14px;background:#21262d;border:1px solid #388bfd;color:#58a6ff;border-radius:6px;font-size:12px;font-weight:600;white-space:nowrap;transition:all .15s;}
 .datasrc-btn:hover{background:#1f3358;border-color:#58a6ff;}
@@ -161,6 +161,10 @@ textarea.tinput{min-height:180px;}
   .side{position:relative;top:0;max-height:none;border-right:none;border-bottom:1px solid var(--border);}
   .content{max-height:none;}
 }
+
+/* Random mode button */
+.btn-rand-on{background:var(--purple);border-color:var(--purple);color:#fff !important;font-weight:600;}
+.btn-rand-on:hover{opacity:.85;}
 </style>
 </head>
 <body>
@@ -247,6 +251,8 @@ let state = {
   history: [],       // [{lessonId, title, correct, total, date, wrongs:[]}]
   errors: {},        // lessonId -> Set of question indices that were ever wrong
   comments: {},      // 'lessonId_qi' -> comment text
+  randomMode: false, // 選択肢ランダム表示モード
+  shuffleMap: {},    // qkey_qi -> shuffled option indices
   dataSourceUrl: '', // URL of all_lessons_data.html
   gistToken: '',    // GitHub Personal Access Token
   gistId: ''        // Gist ID（初回保存後に自動設定）
@@ -257,6 +263,8 @@ function save() {
   // Convert sets to arrays for JSON
   s.errors = {};
   for (const k in state.errors) s.errors[k] = [...state.errors[k]];
+  s.randomMode = state.randomMode;
+  s.shuffleMap = state.shuffleMap;
   localStorage.setItem(STORE_KEY, JSON.stringify(s));
 }
 
@@ -274,6 +282,8 @@ function load() {
     state.dataSourceUrl = s.dataSourceUrl || '';
     state.gistToken = s.gistToken || '';
     state.gistId = s.gistId || '';
+    state.randomMode = s.randomMode || false;
+    state.shuffleMap = s.shuffleMap || {};
     // コメントキーのマイグレーション（旧形式→新形式）
     if (s.comments) {
       const migratedComments = {};
@@ -484,6 +494,7 @@ function renderQuiz(el, lesson, isReview) {
   const answered = qs.scores.filter(x=>x!==null).length;
   const errCount = (isReview ? 0 : (state.errors[lid]?.size || 0));
 
+  const randOn = state.randomMode;
   let html = `
     <div class="sec-hdr">
       <span class="course-chip">${lesson.course} · ${lesson.lesson}</span>
@@ -493,6 +504,7 @@ function renderQuiz(el, lesson, isReview) {
       <span class="score-chip">${correct} / ${answered}</span>
       ${!isReview && errCount > 0 ? `<span class="err-chip">🔴 ${errCount}問ミス</span>` : ''}
       <button class="btn" onclick="resetQuiz('${qkey}',${isReview})">🔄 リセット</button>
+      <button class="btn${randOn?' btn-rand-on':''}" onclick="toggleRandom()" title="選択肢の順番をランダムに表示">🔀 ランダム${randOn?' ON':' OFF'}</button>
       ${qs.done ? `<button class="btn btn-y" onclick="saveHistory('${lid}','${qkey}')">💾 履歴保存</button>` : ''}
     </div>
   `;
@@ -530,14 +542,28 @@ function renderQuiz(el, lesson, isReview) {
         html += `<button class="multi-submit" id="msub_${qkey}_${qi}" onclick="submitMulti('${qkey}',${qi},${isReview},${JSON.stringify(isReview?(errIndices||[]):[])})" ${subDisabled}>回答する（${curSelCount}/${q.multi.length}選択）</button>`;
       }
     } else {
-      // 単一選択問題
-      q.opts.forEach((o, oi) => {
+      // 単一選択問題（ランダムモード対応）
+      const smKey = qkey + '_' + qi;
+      let optOrder;
+      if (state.randomMode) {
+        if (!state.shuffleMap[smKey]) {
+          // まだシャッフルされていない場合は新規シャッフル
+          const arr = q.opts.map((_,i)=>i);
+          for (let i=arr.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]; }
+          state.shuffleMap[smKey] = arr;
+        }
+        optOrder = state.shuffleMap[smKey];
+      } else {
+        optOrder = q.opts.map((_,i)=>i);
+      }
+      optOrder.forEach((oi, dispIdx) => {
+        const o = q.opts[oi];
         let cls = '';
         if (done) {
           if (oi === q.ans) cls = ' ok';
           else if (oi === qs.wrongs[qi] && !wasOk) cls = ' ng';
         }
-        html += `<button class="opt${cls}"${done?' disabled':''} onclick="answerQ('${qkey}',${qi},${oi},${isReview},${JSON.stringify(isReview ? (errIndices||[]) : [])})">${String.fromCharCode(65+oi)}. ${escHtml(o)}</button>`;
+        html += `<button class="opt${cls}"${done?' disabled':''} onclick="answerQ('${qkey}',${qi},${oi},${isReview},${JSON.stringify(isReview ? (errIndices||[]) : [])})">'${String.fromCharCode(65+dispIdx)}. ${escHtml(o)}</button>`;
       });
     }
 
@@ -565,7 +591,7 @@ function renderQuiz(el, lesson, isReview) {
       html += `<div class="comment-box">
         <div class="comment-label">📝 メモ・コメント（内容は自動保存されます）</div>
         <textarea class="comment-ta" id="cmt_${qkey}_${qi}" placeholder="ここに気づきや疑問点を記録できます..."
-          oninput="saveCommentFixed('${lesson.course.replace(/\s/g,'')}','${lesson.lesson}',${qi},this.value)">${escHtml(savedComment)}</textarea>
+          oninput="autoResizeMemo(this);saveCommentFixed('${lesson.course.replace(/\s/g,'')}','${lesson.lesson}',${qi},this.value)">${escHtml(savedComment)}</textarea>
       </div>`;
     }
 
@@ -573,6 +599,13 @@ function renderQuiz(el, lesson, isReview) {
   });
 
   el.innerHTML = html;
+  // メモ欄の高さを保存済みテキストに合わせて自動調整
+  setTimeout(() => {
+    document.querySelectorAll('.comment-ta').forEach(ta => {
+      ta.style.height = 'auto';
+      ta.style.height = ta.scrollHeight + 'px';
+    });
+  }, 0);
 }
 
 // ── 複数選択問題の処理 ──────────────────────────────────
@@ -645,6 +678,21 @@ function submitMulti(qkey, qi, isReview, errIndices) {
   }, 100);
 }
 
+// ── メモ欄自動リサイズ ──────────────────────────────────
+function autoResizeMemo(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+
+// ── ランダムモード切替 ─────────────────────────────────
+function toggleRandom() {
+  state.randomMode = !state.randomMode;
+  // シャッフルマップをリセット（新しいモードで再シャッフル）
+  state.shuffleMap = {};
+  save();
+  renderContent();
+}
+
 function answerQ(qkey, qi, chosen, isReview, errIndices) {
   const lid = state.activeLesson;
   const lesson = state.lessons.find(l=>l.id===lid);
@@ -687,6 +735,9 @@ function answerQ(qkey, qi, chosen, isReview, errIndices) {
 }
 
 function resetQuiz(qkey, isReview) {
+  // シャッフルマップもリセット
+  const shuffleKeys = Object.keys(state.shuffleMap).filter(k=>k.startsWith(qkey));
+  shuffleKeys.forEach(k=>delete state.shuffleMap[k]);
   delete state.quizState[qkey];
   save();
   renderContent();
